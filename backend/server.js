@@ -11,6 +11,11 @@ app.use(express.json());
 app.use('/api/vector-field', vectorFieldRoutes);
 app.use('/api/integration', integrationRoutes);
 
+// Health check endpoint for initial setup validation
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.listen(3000, () => {
   console.log('Backend rodando na porta 3000...');
 });

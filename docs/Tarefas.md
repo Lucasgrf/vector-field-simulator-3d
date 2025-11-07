@@ -1,0 +1,153 @@
+# Tarefas – Simulador Interativo 3D de Campos Vetoriais
+
+Este documento lista as tarefas necessárias para entregar o simulador completo descrito em `docs/relatorio_calculo2.pdf`, cobrindo frontend (Three.js), backend (Node.js + mathjs), funcionalidades matemáticas (campo, divergente, rotacional, linhas de fluxo, integrais de linha), UX, performance, testes e documentação.
+
+---
+
+## Escopo e Entregáveis
+
+- Aplicação web com visualização 3D de campos vetoriais (setas/instâncias + cores por magnitude/medidas).
+- Backend com APIs para avaliar campo, divergente, rotacional, linhas de fluxo e integrais de linha.
+- Interface para definir funções (P, Q, R), faixa de domínio, densidade de amostragem e parâmetros de simulação.
+- Visualização de linhas de fluxo (partículas/linhas) e curvas paramétricas para integrais de linha.
+- Exportação (imagem, presets), documentação e exemplos validados.
+
+---
+
+## Roadmap por Fases
+
+- Fase 0 – Setup básico: repos, scripts, cena 3D mínima, rotas iniciais (Concluída)
+- Fase 1 – Parser/segurança de expressões e avaliação do campo (ponto e grade).
+- Fase 2 – Divergente e Rotacional (simbólico e/ou numérico) + endpoints.
+- Fase 3 – Amostragem em grade e renderização vetorial performática (InstancedMesh).
+- Fase 4 – Linhas de fluxo (integração ODE com RK4) + visualização de partículas/linhas.
+- Fase 5 – Integrais de linha em curvas paramétricas + UI/plot da curva.
+- Fase 6 – UX: painel de controle, presets, estados, erros; performance (Web Worker).
+- Fase 7 – Persistência/exportação, testes, validação numérica e documentação final.
+
+---
+
+## Tarefas Detalhadas
+
+### Backend Matemático (Node.js + mathjs)
+
+- [ ] Expressões do usuário
+  - [ ] Validar entrada de `(P(x,y,z), Q(x,y,z), R(x,y,z))` (somente x,y,z e funções/operadores permitidos).
+  - [ ] Parsear/compilar com `mathjs` (AST), rejeitar símbolos proibidos.
+  - [ ] Mensagens de erro claras (posição/descrição) e exemplos válidos.
+
+- [ ] Avaliação do campo
+  - [x] Endpoint `POST /api/vector-field/evaluate` (ponto único: `[x,y,z]`).
+  - [ ] Endpoint `POST /api/vector-field/evaluate-grid` (lote: grade de pontos no domínio).
+  - [ ] Cache de AST/compilados por expressão para performance.
+
+- [ ] Infra de setup
+  - [x] Endpoint `GET /api/health` para verificação inicial de ambiente.
+
+- [ ] Derivadas, Divergente e Rotacional
+  - [ ] Implementar via `mathjs.derivative` (simbólico) quando possível.
+  - [ ] Implementar fallback numérico (diferenças finitas) com passo `h` configurável.
+  - [ ] Endpoints: `POST /api/vector-field/div` e `POST /api/vector-field/curl` (ponto e/ou grid).
+
+- [ ] Linhas de fluxo (streamlines)
+  - [ ] Integrador ODE RK4 para `dr/dt = F(r)` com passo e limites de iteração.
+  - [ ] Parâmetros: seeds, passo, maxSteps, bounding box, tolerância de velocidade mínima.
+  - [ ] Endpoint `POST /api/streamlines` retornando polilinhas por seed.
+
+- [ ] Integrais de linha
+  - [ ] Entrada: curva paramétrica `r(t)`, intervalo `[a,b]`, campo `F`.
+  - [ ] Cálculo de `∫ F(r(t)) · r'(t) dt` (Simpson/trapezoidal adaptativo).
+  - [ ] Endpoint `POST /api/integration/line` com presets de curvas (reta, circunferência, hélice).
+
+- [ ] Qualidade e desempenho
+  - [ ] Avaliação vetorizada em lote (arrays de pontos).
+  - [ ] Timeouts e limites (tamanho de grade, passos máximos) para evitar travamentos.
+  - [ ] Testes unitários: campos conhecidos (radial `F=(x,y,z)` → `div=3`; `F=(-y,x,0)` → `curl=(0,0,2)`; integral na circunferência → `2π`).
+
+### Frontend 3D (Three.js)
+
+- [ ] Base e organização
+  - [ ] Estruturar módulos: `renderer`, `vectorFieldRenderer`, `streamlinesRenderer`, `ui`.
+  - [x] Responsividade e controles de câmera (OrbitControls) já configurados.
+
+- [ ] Renderização do campo vetorial
+  - [ ] Amostrar grade no domínio configurável (x,y,z mín/máx e resolução).
+  - [ ] InstancedMesh para setas (geometria única, cores por instância) para performance.
+  - [ ] Escalas: normalizar vetores, fator de escala, limiar de corte.
+  - [ ] Colormaps por magnitude, divergente ou rotacional; legenda de cores.
+
+- [ ] Linhas de fluxo
+  - [ ] UI para seeds (clique na cena e/ou presets em grade/plano).
+  - [ ] Renderização de polilinhas e/ou partículas animadas seguindo as linhas.
+  - [ ] Controles: velocidade da animação, comprimento máximo, densidade de seeds.
+
+- [ ] Integrais de linha (UI)
+  - [ ] Editor/seleção de curva: presets (reta, circunferência, hélice) e entrada paramétrica.
+  - [ ] Pré-visualização da curva e resultado numérico do integral.
+
+- [ ] Painel de controle e UX
+  - [ ] Inputs para `P,Q,R`, domínio (min/max), resolução, modos de cor, normalização.
+  - [ ] Presets de campos (radial, rotacional, fluxo em z, etc.).
+  - [ ] Indicadores de carregamento/erro; debounce/throttle para recomputações.
+  - [ ] Opção para mover cálculos pesados a Web Worker (quando aplicável).
+
+### Integração Frontend/Backend
+
+- [ ] Serviço de API (fetch/axios) com tratamento de erros e cancelamento.
+- [x] CORS habilitado e proxy de desenvolvimento (`/api` → `http://localhost:3000`).
+- [ ] Protocolos de payload consistentes (ponto único, grade, seeds, curvas).
+
+### Persistência e Exportação
+
+- [ ] Salvar presets de campo/domínio/parâmetros em `localStorage` (export/import JSON).
+- [ ] Exportar imagem do viewport (PNG) e dados de linhas de fluxo (GeoJSON/JSON).
+- [ ] Exportar resultados de integrais (JSON/CSV simples) quando aplicável.
+
+### Qualidade, Scripts e Validação
+
+- [ ] Scripts NPM: `dev`, `build`, `start`, `lint` (opcional), `test`.
+- [ ] Testes unitários (backend) e testes manuais com cenários conhecidos.
+- [ ] Limites de parâmetros para evitar travas (resolução máx, seeds máx, passos máx).
+
+### Documentação
+
+- [ ] Atualizar `README.md` (raiz) com visão geral e como executar.
+- [ ] Atualizar `backend/README.md` e `frontend/README.md` com instruções e endpoints.
+- [ ] Adicionar prints/gifs da visualização e exemplos (radial, rotacional, integral = 2π).
+- [ ] Referências (Three.js, mathjs, Stewart, etc.).
+
+---
+
+## Critérios de Aceite (DoD)
+
+- [ ] Campo vetorial: renderização em 3D com coloração por magnitude/div/rot, em uma grade configurável.
+- [ ] Divergente/Rotacional: cálculo correto (validado com exemplos analíticos) no ponto e na grade.
+- [ ] Linhas de fluxo: geração estável (RK4), visualização clara e controle de densidade/comprimento.
+- [ ] Integrais de linha: cálculo numérico com presets e visualização da curva; exemplo da circunferência retorna ~`2π`.
+- [ ] UI: entrada de funções e parâmetros com validação, presets e feedback de erro.
+- [ ] Performance: interação fluida com grades médias (ex.: 17^3 setas) e múltiplas streamlines.
+- [ ] Documentação: instruções de uso, prints, e resumo técnico alinhado ao relatório.
+
+---
+
+## Riscos e Mitigações
+
+- Expressões inseguras: uso de AST e whitelist (sem `eval`).
+- Performance em grades altas: InstancedMesh, limites e amostragem adaptativa.
+- Estabilidade numérica: passos e tolerâncias configuráveis; caps e testes com campos conhecidos.
+- Latência: avaliação em lote e cache de expressões; Web Worker no front.
+
+---
+
+## Timeline Sugerida (exemplo)
+
+- Semana 1: Fases 1–2 (parser, avaliar campo, div/rot) + testes básicos.
+- Semana 2: Fases 3–4 (render vetorial instanciado, streamlines + UI seeds).
+- Semana 3: Fase 5 (integrais de linha) + UX/painel completo.
+- Semana 4: Performance, persistência/export, documentação, validação final.
+
+---
+
+## Observações
+
+- Alguns itens já existem no repo (cena 3D básica, rotas iniciais). Esta lista consolida a entrega final completa e pode ser usada como backlog até a versão 1.0.
