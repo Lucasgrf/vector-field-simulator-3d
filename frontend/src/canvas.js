@@ -74,3 +74,5 @@ renderVectorField(scene).catch(err => console.error('Erro ao renderizar campo:',
 // Expor a cena globalmente para integração simples da UI
 // (apenas em desenvolvimento; pode ser removido/encapsulado futuramente)
 window.vfsScene = scene;
+window.vfsCamera = camera;
+window.vfsRenderer = renderer;

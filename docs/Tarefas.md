@@ -49,10 +49,10 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
   - [x] Implementar fallback numérico (diferenças finitas) com passo `h` configurável.
   - [x] Endpoints: `POST /api/vector-field/div` e `POST /api/vector-field/curl` (ponto e/ou grid).
 
-- [ ] Linhas de fluxo (streamlines)
-  - [ ] Integrador ODE RK4 para `dr/dt = F(r)` com passo e limites de iteração.
-  - [ ] Parâmetros: seeds, passo, maxSteps, bounding box, tolerância de velocidade mínima.
-  - [ ] Endpoint `POST /api/streamlines` retornando polilinhas por seed.
+- [x] Linhas de fluxo (streamlines)
+  - [x] Integrador ODE RK4 para `dr/dt = F(r)` com passo e limites de iteração.
+  - [x] Parâmetros: seeds, passo, maxSteps, bounding box, tolerância de velocidade mínima.
+  - [x] Endpoint `POST /api/streamlines` retornando polilinhas por seed.
 
 - [ ] Integrais de linha
   - [ ] Entrada: curva paramétrica `r(t)`, intervalo `[a,b]`, campo `F`.
@@ -76,10 +76,10 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
   - [x] Escalas: normalizar direção, escala de comprimento por magnitude, limiar mínimo.
   - [x] Colormap por magnitude, divergente e rotacional (|curl|) com legenda.
 
-- [ ] Linhas de fluxo
-  - [ ] UI para seeds (clique na cena e/ou presets em grade/plano).
-  - [ ] Renderização de polilinhas e/ou partículas animadas seguindo as linhas.
-  - [ ] Controles: velocidade da animação, comprimento máximo, densidade de seeds.
+- [x] Linhas de fluxo
+  - [x] UI para seeds (presets em grade no plano z=meio, densidade Nx×Ny).
+  - [x] Renderização de polilinhas para cada streamline.
+  - [x] Controles: passo (h), maxSteps, densidade de seeds.
 
 - [ ] Integrais de linha (UI)
   - [ ] Editor/seleção de curva: presets (reta, circunferência, hélice) e entrada paramétrica.

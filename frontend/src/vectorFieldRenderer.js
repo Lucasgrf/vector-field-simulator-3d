@@ -53,7 +53,7 @@ function createLegend() {
     boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   });
   const label = document.createElement('div');
-  label.textContent = 'Magnitude (min → max)';
+  label.textContent = 'Magnitude (min -> max)';
   Object.assign(label.style, {
     position: 'absolute',
     top: '-18px',
@@ -233,3 +233,4 @@ export async function renderVectorField(scene, options = {}) {
 export async function updateVectorField(scene, options) {
   return renderVectorField(scene, options);
 }
+
