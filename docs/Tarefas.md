@@ -45,9 +45,9 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
   - [x] Endpoint `GET /api/health` para verificação inicial de ambiente.
 
 - [ ] Derivadas, Divergente e Rotacional
-  - [ ] Implementar via `mathjs.derivative` (simbólico) quando possível.
-  - [ ] Implementar fallback numérico (diferenças finitas) com passo `h` configurável.
-  - [ ] Endpoints: `POST /api/vector-field/div` e `POST /api/vector-field/curl` (ponto e/ou grid).
+  - [x] Implementar via `mathjs.derivative` (simbólico) quando possível.
+  - [x] Implementar fallback numérico (diferenças finitas) com passo `h` configurável.
+  - [x] Endpoints: `POST /api/vector-field/div` e `POST /api/vector-field/curl` (ponto e/ou grid).
 
 - [ ] Linhas de fluxo (streamlines)
   - [ ] Integrador ODE RK4 para `dr/dt = F(r)` com passo e limites de iteração.
@@ -105,9 +105,10 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
 
 ### Qualidade, Scripts e Validação
 
-- [ ] Scripts NPM: `dev`, `build`, `start`, `lint` (opcional), `test`.
-- [ ] Testes unitários (backend) e testes manuais com cenários conhecidos.
-- [ ] Limites de parâmetros para evitar travas (resolução máx, seeds máx, passos máx).
+- [x] Scripts NPM: `dev`, `build`, `start`, `lint` (opcional), `test`.
+- [x] Testes unitários (backend) para helpers e derivadas; testes manuais dos endpoints.
+- [x] Limites de parâmetros para evitar travas (resolução máx, seeds máx, passos máx).
+- [x] Executar testes automaticamente ao iniciar o backend (`prestart`).
 
 ### Documentação
 
