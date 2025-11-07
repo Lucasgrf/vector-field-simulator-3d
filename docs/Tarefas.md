@@ -31,15 +31,15 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
 
 ### Backend Matemático (Node.js + mathjs)
 
-- [ ] Expressões do usuário
-  - [ ] Validar entrada de `(P(x,y,z), Q(x,y,z), R(x,y,z))` (somente x,y,z e funções/operadores permitidos).
-  - [ ] Parsear/compilar com `mathjs` (AST), rejeitar símbolos proibidos.
-  - [ ] Mensagens de erro claras (posição/descrição) e exemplos válidos.
+- [x] Expressões do usuário
+  - [x] Validar entrada de `(P(x,y,z), Q(x,y,z), R(x,y,z))` (somente x,y,z e funções/operadores permitidos).
+  - [x] Parsear/compilar com `mathjs` (AST), rejeitar símbolos proibidos.
+  - [x] Mensagens de erro claras (posição/descrição) e exemplos válidos.
 
 - [ ] Avaliação do campo
   - [x] Endpoint `POST /api/vector-field/evaluate` (ponto único: `[x,y,z]`).
-  - [ ] Endpoint `POST /api/vector-field/evaluate-grid` (lote: grade de pontos no domínio).
-  - [ ] Cache de AST/compilados por expressão para performance.
+  - [x] Endpoint `POST /api/vector-field/evaluate-grid` (lote: grade de pontos no domínio ou lista de pontos).
+  - [x] Cache de AST/compilados por expressão para performance.
 
 - [ ] Infra de setup
   - [x] Endpoint `GET /api/health` para verificação inicial de ambiente.
