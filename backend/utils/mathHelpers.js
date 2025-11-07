@@ -68,7 +68,7 @@ function parseVectorExpression(fieldStr) {
 }
 
 // Simple in-memory cache for compiled fields
-const fieldCache = new Map(); // key: normalized field string -> { comps: [fP,fQ,fR] }
+const fieldCache = new Map(); // key: normalized field string -> { nodes, comps, cache: {div,curl} }
 
 function getCompiledField(fieldStr) {
   const key = fieldStr.trim();
@@ -76,7 +76,7 @@ function getCompiledField(fieldStr) {
   if (cached) return cached;
   const nodes = parseVectorExpression(fieldStr);
   const comps = nodes.map(compileNode);
-  const entry = { comps };
+  const entry = { nodes, comps, cache: {} };
   fieldCache.set(key, entry);
   // lightweight cache cap
   if (fieldCache.size > 32) {
@@ -143,4 +143,103 @@ module.exports = {
   validateDomain,
   validateResolution,
 };
+
+// ---- Derivatives: divergence and curl ----
+
+function derivativeNode(node, variable) {
+  return math.derivative(node, variable);
+}
+
+function compileDiv(nodes) {
+  const dPx = derivativeNode(nodes[0], 'x');
+  const dQy = derivativeNode(nodes[1], 'y');
+  const dRz = derivativeNode(nodes[2], 'z');
+  const divNode = new math.OperatorNode('+', 'add', [
+    new math.OperatorNode('+', 'add', [dPx, dQy]),
+    dRz,
+  ]);
+  return compileNode(divNode);
+}
+
+function compileCurl(nodes) {
+  const dRdy = derivativeNode(nodes[2], 'y');
+  const dQdz = derivativeNode(nodes[1], 'z');
+  const dPdz = derivativeNode(nodes[0], 'z');
+  const dRdx = derivativeNode(nodes[2], 'x');
+  const dQdx = derivativeNode(nodes[1], 'x');
+  const dPdy = derivativeNode(nodes[0], 'y');
+  const cxNode = new math.OperatorNode('-', 'subtract', [dRdy, dQdz]);
+  const cyNode = new math.OperatorNode('-', 'subtract', [dPdz, dRdx]);
+  const czNode = new math.OperatorNode('-', 'subtract', [dQdx, dPdy]);
+  return [compileNode(cxNode), compileNode(cyNode), compileNode(czNode)];
+}
+
+function numericPartial(comp, point, axis, h) {
+  const [x, y, z] = point;
+  const scopePlus = { x, y, z, pi: Math.PI, e: Math.E };
+  const scopeMinus = { x, y, z, pi: Math.PI, e: Math.E };
+  if (axis === 'x') { scopePlus.x = x + h; scopeMinus.x = x - h; }
+  if (axis === 'y') { scopePlus.y = y + h; scopeMinus.y = y - h; }
+  if (axis === 'z') { scopePlus.z = z + h; scopeMinus.z = z - h; }
+  const fp = comp(scopePlus);
+  const fm = comp(scopeMinus);
+  return (fp - fm) / (2 * h);
+}
+
+function evaluateDivergenceAtPoint(fieldData, point, { method = 'auto', h = 1e-3 } = {}) {
+  const scope = { x: point[0], y: point[1], z: point[2], pi: Math.PI, e: Math.E };
+  if (method === 'symbolic' || method === 'auto') {
+    try {
+      if (!fieldData.cache.div) {
+        fieldData.cache.div = compileDiv(fieldData.nodes);
+      }
+      return fieldData.cache.div(scope);
+    } catch (_) {
+      if (method === 'symbolic') throw new Error('Falha no cálculo simbólico do divergente.');
+      // fallback para numérico
+    }
+  }
+  const [fP, fQ, fR] = fieldData.comps;
+  const dPx = numericPartial(fP, point, 'x', h);
+  const dQy = numericPartial(fQ, point, 'y', h);
+  const dRz = numericPartial(fR, point, 'z', h);
+  return dPx + dQy + dRz;
+}
+
+function evaluateCurlAtPoint(fieldData, point, { method = 'auto', h = 1e-3 } = {}) {
+  const scope = { x: point[0], y: point[1], z: point[2], pi: Math.PI, e: Math.E };
+  if (method === 'symbolic' || method === 'auto') {
+    try {
+      if (!fieldData.cache.curl) {
+        fieldData.cache.curl = compileCurl(fieldData.nodes);
+      }
+      const [cx, cy, cz] = fieldData.cache.curl;
+      return [cx(scope), cy(scope), cz(scope)];
+    } catch (_) {
+      if (method === 'symbolic') throw new Error('Falha no cálculo simbólico do rotacional.');
+      // fallback para numérico
+    }
+  }
+  const [fP, fQ, fR] = fieldData.comps;
+  const dRdy = numericPartial(fR, point, 'y', h);
+  const dQdz = numericPartial(fQ, point, 'z', h);
+  const dPdz = numericPartial(fP, point, 'z', h);
+  const dRdx = numericPartial(fR, point, 'x', h);
+  const dQdx = numericPartial(fQ, point, 'x', h);
+  const dPdy = numericPartial(fP, point, 'y', h);
+  return [dRdy - dQdz, dPdz - dRdx, dQdx - dPdy];
+}
+
+function evaluateScalarOnPoints(fieldData, points, options, scalarEvaluator) {
+  return points.map((p) => scalarEvaluator(fieldData, p, options));
+}
+
+function evaluateVectorOnPoints(fieldData, points, options, vectorEvaluator) {
+  return points.map((p) => vectorEvaluator(fieldData, p, options));
+}
+
+module.exports.evaluateDivergenceAtPoint = evaluateDivergenceAtPoint;
+module.exports.evaluateCurlAtPoint = evaluateCurlAtPoint;
+module.exports.evaluateScalarOnPoints = evaluateScalarOnPoints;
+module.exports.evaluateVectorOnPoints = evaluateVectorOnPoints;
 
