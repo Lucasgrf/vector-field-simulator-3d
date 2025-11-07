@@ -1,3 +1,5 @@
+import { updateVectorField } from './vectorFieldRenderer.js';
+
 // Minimal UI for Phase 0: backend health test
 (function initPhase0UI() {
   const btn = document.createElement('button');
@@ -38,4 +40,223 @@
     }
   });
   document.body.appendChild(btn);
+})();
+
+// UI principal: controle de campo e domínio
+(function initFieldUI() {
+  const panel = document.createElement('div');
+  Object.assign(panel.style, {
+    position: 'fixed',
+    top: '12px',
+    left: '12px',
+    zIndex: '1000',
+    width: '300px',
+    padding: '12px',
+    borderRadius: '8px',
+    background: 'rgba(255,255,255,0.9)',
+    border: '1px solid rgba(0,0,0,0.2)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    fontFamily: 'sans-serif',
+    color: '#222'
+  });
+
+  panel.innerHTML = `
+    <div style="font-weight:600; margin-bottom:8px;">Campo Vetorial (P, Q, R)</div>
+    <div style="display:grid; grid-template-columns: 1fr; gap:6px;">
+      <select id="vfs-preset" style="padding:6px; border-radius:6px;">
+        <option value="custom">— Presets —</option>
+        <option value="(x,y,z)">Radial (x, y, z)</option>
+        <option value="(-y,x,0)">Rotacional plano (−y, x, 0)</option>
+        <option value="(-x,-y,-z)">Sumidouro (−x, −y, −z)</option>
+        <option value="(-y,x,0.2*z)">Swirl 3D (−y, x, 0.2z)</option>
+      </select>
+      <input id="vfs-P" placeholder="P(x,y,z)" value="x" style="padding:6px; border-radius:6px;" />
+      <input id="vfs-Q" placeholder="Q(x,y,z)" value="y" style="padding:6px; border-radius:6px;" />
+      <input id="vfs-R" placeholder="R(x,y,z)" value="z" style="padding:6px; border-radius:6px;" />
+    </div>
+    <div style="font-weight:600; margin:8px 0 4px;">Colorir por</div>
+    <select id="vfs-mode" style="padding:6px; border-radius:6px; width:100%;">
+      <option value="magnitude" selected>Magnitude do campo |F|</option>
+      <option value="div">Divergente div F</option>
+      <option value="curl">Rotacional |curl F|</option>
+    </select>
+    <div style="font-weight:600; margin:8px 0 4px;">Domínio</div>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+      <label style="grid-column: span 1;">x</label>
+      <input id="vfs-xmin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-xmax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <span></span>
+      <label style="grid-column: span 1;">y</label>
+      <input id="vfs-ymin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-ymax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <span></span>
+      <label style="grid-column: span 1;">z</label>
+      <input id="vfs-zmin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-zmax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <span></span>
+    </div>
+    <div style="font-weight:600; margin:8px 0 4px;">Resolução</div>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+      <label>nx</label>
+      <input id="vfs-nx" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>ny</label>
+      <input id="vfs-ny" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>nz</label>
+      <input id="vfs-nz" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+    </div>
+    <div style="font-weight:600; margin:8px 0 4px;">Escala das setas</div>
+    <div style="display:grid; grid-template-columns: 1fr 60px; gap:8px; align-items:center;">
+      <input id="vfs-scale" type="range" min="0.3" max="3" step="0.1" value="1" />
+      <input id="vfs-scale-num" type="number" min="0.3" max="3" step="0.1" value="1" style="padding:4px; border-radius:6px;" />
+    </div>
+    <div style="font-weight:600; margin:8px 0 4px;">Raio das setas</div>
+    <div style="display:grid; grid-template-columns: 1fr 60px; gap:8px; align-items:center;">
+      <input id="vfs-radius" type="range" min="0.5" max="3" step="0.1" value="1" />
+      <input id="vfs-radius-num" type="number" min="0.5" max="3" step="0.1" value="1" style="padding:4px; border-radius:6px;" />
+    </div>
+    <label style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+      <input id="vfs-auto" type="checkbox" />
+      Aplicar automaticamente
+    </label>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button id="vfs-render" style="flex:1; padding:8px; border-radius:6px; border:1px solid #1976d2; background:#2196f3; color:#fff;">Renderizar</button>
+      <span id="vfs-status" style="align-self:center; font-size:12px; color:#444;"></span>
+    </div>
+  `;
+
+  document.body.appendChild(panel);
+
+  const qs = (id) => panel.querySelector(id);
+  const elPreset = qs('#vfs-preset');
+  const elP = qs('#vfs-P');
+  const elQ = qs('#vfs-Q');
+  const elR = qs('#vfs-R');
+  const elXmin = qs('#vfs-xmin');
+  const elXmax = qs('#vfs-xmax');
+  const elYmin = qs('#vfs-ymin');
+  const elYmax = qs('#vfs-ymax');
+  const elZmin = qs('#vfs-zmin');
+  const elZmax = qs('#vfs-zmax');
+  const elMode = qs('#vfs-mode');
+  const elNx = qs('#vfs-nx');
+  const elNy = qs('#vfs-ny');
+  const elNz = qs('#vfs-nz');
+  const elScale = qs('#vfs-scale');
+  const elScaleNum = qs('#vfs-scale-num');
+  const elRadius = qs('#vfs-radius');
+  const elRadiusNum = qs('#vfs-radius-num');
+  const elRender = qs('#vfs-render');
+  const elAuto = qs('#vfs-auto');
+  const elStatus = qs('#vfs-status');
+
+  elPreset.addEventListener('change', () => {
+    const v = elPreset.value;
+    if (v && v !== 'custom') {
+      // tentar extrair três componentes separados do preset "(P,Q,R)"
+      try {
+        const inner = v.replace(/^\(|\)$/g, '');
+        const [p, q, r] = inner.split(',');
+        elP.value = p;
+        elQ.value = q;
+        elR.value = r;
+      } catch (_) { /* ignore */ }
+    }
+  });
+
+  function clampInt(n, min, max) {
+    n = Math.round(Number(n));
+    if (!isFinite(n)) n = min;
+    return Math.max(min, Math.min(max, n));
+  }
+
+  async function doRender() {
+    if (!window.vfsScene) return;
+    const P = elP.value.trim() || '0';
+    const Q = elQ.value.trim() || '0';
+    const R = elR.value.trim() || '0';
+    const field = `(${P}, ${Q}, ${R})`;
+
+    const x0 = Number(elXmin.value); const x1 = Number(elXmax.value);
+    const y0 = Number(elYmin.value); const y1 = Number(elYmax.value);
+    const z0 = Number(elZmin.value); const z1 = Number(elZmax.value);
+    const nx = clampInt(elNx.value, 3, 21);
+    const ny = clampInt(elNy.value, 3, 21);
+    const nz = clampInt(elNz.value, 3, 21);
+    let scale = Number(elScaleNum.value);
+    if (!isFinite(scale)) scale = 1;
+    scale = Math.min(3, Math.max(0.3, scale));
+    let radiusScale = Number(elRadiusNum.value);
+    if (!isFinite(radiusScale)) radiusScale = 1;
+    radiusScale = Math.min(3, Math.max(0.5, radiusScale));
+
+    elNx.value = nx; elNy.value = ny; elNz.value = nz;
+    elScale.value = String(scale);
+    elScaleNum.value = String(scale);
+    elRadius.value = String(radiusScale);
+    elRadiusNum.value = String(radiusScale);
+
+    const domain = {
+      x: [Math.min(x0, x1), Math.max(x0, x1)],
+      y: [Math.min(y0, y1), Math.max(y0, y1)],
+      z: [Math.min(z0, z1), Math.max(z0, z1)],
+    };
+    const resolution = { nx, ny, nz };
+
+    elRender.disabled = true;
+    const prevText = elRender.textContent;
+    elRender.textContent = 'Renderizando...';
+    elStatus.textContent = '';
+    try {
+      await updateVectorField(window.vfsScene, { field, domain, resolution, mode: elMode.value, scale, radiusScale, useInstancing: false });
+      elStatus.textContent = 'OK';
+      elStatus.style.color = '#2e7d32';
+    } catch (err) {
+      console.error(err);
+      elStatus.textContent = (err && err.message) ? err.message : 'Erro';
+      elStatus.style.color = '#b71c1c';
+    } finally {
+      elRender.disabled = false;
+      elRender.textContent = prevText;
+    }
+  }
+
+  elRender.addEventListener('click', doRender);
+  // Enter para renderizar
+  [elP, elQ, elR, elXmin, elXmax, elYmin, elYmax, elZmin, elZmax, elNx, elNy, elNz]
+    .forEach((el) => el.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRender(); }));
+
+  // Sync slider and numeric input
+  elScale.addEventListener('input', () => {
+    elScaleNum.value = elScale.value;
+  });
+  elScaleNum.addEventListener('input', () => {
+    elScale.value = elScaleNum.value;
+  });
+  elRadius.addEventListener('input', () => {
+    elRadiusNum.value = elRadius.value;
+  });
+  elRadiusNum.addEventListener('input', () => {
+    elRadius.value = elRadiusNum.value;
+  });
+  // Debounce helper for auto-apply
+  function debounce(fn, ms = 400) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  }
+  const debouncedRender = debounce(doRender, 450);
+  function maybeAutoApply() {
+    if (elAuto && elAuto.checked) debouncedRender();
+  }
+  // Auto-apply on input changes
+  [elP, elQ, elR,
+   elXmin, elXmax, elYmin, elYmax, elZmin, elZmax,
+   elNx, elNy, elNz,
+   elMode,
+   elScale, elScaleNum,
+   elRadius, elRadiusNum]
+    .forEach((el) => el.addEventListener('input', maybeAutoApply));
+  elPreset.addEventListener('change', maybeAutoApply);
 })();
