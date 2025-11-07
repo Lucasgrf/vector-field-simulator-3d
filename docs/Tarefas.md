@@ -70,11 +70,11 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
   - [ ] Estruturar módulos: `renderer`, `vectorFieldRenderer`, `streamlinesRenderer`, `ui`.
   - [x] Responsividade e controles de câmera (OrbitControls) já configurados.
 
-- [ ] Renderização do campo vetorial
-  - [ ] Amostrar grade no domínio configurável (x,y,z mín/máx e resolução).
-  - [ ] InstancedMesh para setas (geometria única, cores por instância) para performance.
-  - [ ] Escalas: normalizar vetores, fator de escala, limiar de corte.
-  - [ ] Colormaps por magnitude, divergente ou rotacional; legenda de cores.
+- [x] Renderização do campo vetorial
+  - [x] Amostrar grade no domínio configurável (x,y,z mín/máx e resolução) e integrar com backend.
+  - [x] InstancedMesh para setas (cone instanciado) com cores por instância.
+  - [x] Escalas: normalizar direção, escala de comprimento por magnitude, limiar mínimo.
+  - [x] Colormap por magnitude, divergente e rotacional (|curl|) com legenda.
 
 - [ ] Linhas de fluxo
   - [ ] UI para seeds (clique na cena e/ou presets em grade/plano).
@@ -86,9 +86,13 @@ Este documento lista as tarefas necessárias para entregar o simulador completo 
   - [ ] Pré-visualização da curva e resultado numérico do integral.
 
 - [ ] Painel de controle e UX
-  - [ ] Inputs para `P,Q,R`, domínio (min/max), resolução, modos de cor, normalização.
-  - [ ] Presets de campos (radial, rotacional, fluxo em z, etc.).
-  - [ ] Indicadores de carregamento/erro; debounce/throttle para recomputações.
+  - [x] Inputs para `P,Q,R`, domínio (min/max), resolução.
+  - [x] Presets de campos (radial, rotacional, sumidouro, swirl 3D).
+  - [x] Indicadores de carregamento/erro mínimos.
+  - [x] Controle de escala das setas.
+  - [x] Controle de raio das setas.
+  - [ ] Modos de cor (div/rot) e normalização avançada.
+  - [x] Debounce/throttle para recomputações (aplicar automaticamente).
   - [ ] Opção para mover cálculos pesados a Web Worker (quando aplicável).
 
 ### Integração Frontend/Backend

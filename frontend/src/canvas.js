@@ -1,11 +1,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { renderVectorField } from './vectorFieldRenderer.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0xf0f0f0, 1);
+// Melhor gestão de cores para tons consistentes
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 // Grid helper
@@ -63,3 +67,10 @@ function animate() {
 }
 
 animate();
+
+// Renderiza o campo vetorial padrão após carregar a cena
+renderVectorField(scene).catch(err => console.error('Erro ao renderizar campo:', err));
+
+// Expor a cena globalmente para integração simples da UI
+// (apenas em desenvolvimento; pode ser removido/encapsulado futuramente)
+window.vfsScene = scene;
