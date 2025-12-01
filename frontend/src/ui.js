@@ -1,5 +1,6 @@
 import { updateVectorField } from './vectorFieldRenderer.js';
 import { renderStreamlines, clearStreamlines } from './streamlinesRenderer.js';
+import { renderCurve, clearCurve } from './curveRenderer.js';
 import * as THREE from 'three';
 
 // Minimal UI for Phase 0: backend health test
@@ -164,6 +165,26 @@ import * as THREE from 'three';
         <option value="speed">Velocidade |F|</option>
       </select>
     </div>
+    </div>
+    <hr style="margin:12px 0; border:none; border-top:1px solid rgba(0,0,0,0.1)" />
+    <div style="font-weight:600; margin:6px 0 4px;">Integral de Linha</div>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+      <label>x(t)</label>
+      <input id="vfs-curve-x" placeholder="cos(t)" value="cos(t)" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <label>y(t)</label>
+      <input id="vfs-curve-y" placeholder="sin(t)" value="sin(t)" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <label>z(t)</label>
+      <input id="vfs-curve-z" placeholder="0" value="0" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <label>t min</label>
+      <input id="vfs-tmin" type="number" step="0.1" value="0" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>max</label>
+      <input id="vfs-tmax" type="number" step="0.1" value="6.28" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="vfs-calc-line" style="flex:1; padding:8px; border-radius:6px; border:1px solid #e65100; background:#ff9800; color:#fff;">Calcular Integral</button>
+      <button id="vfs-clear-line" style="flex:0 0 40px; padding:8px; border-radius:6px; border:1px solid #9e9e9e; background:#e0e0e0; color:#222;">X</button>
+    </div>
+    <div id="vfs-line-result" style="margin-top:6px; font-weight:bold; color:#e65100; text-align:center;"></div>
   `;
 
   document.body.appendChild(panel);
@@ -454,6 +475,65 @@ import * as THREE from 'three';
   if (window.vfsRenderer) {
     window.vfsRenderer.domElement.addEventListener('pointerdown', onCanvasClick);
   }
+
+  // --- Integral de Linha ---
+  const elCurveX = qs('#vfs-curve-x');
+  const elCurveY = qs('#vfs-curve-y');
+  const elCurveZ = qs('#vfs-curve-z');
+  const elTmin = qs('#vfs-tmin');
+  const elTmax = qs('#vfs-tmax');
+  const elCalcLine = qs('#vfs-calc-line');
+  const elClearLine = qs('#vfs-clear-line');
+  const elLineResult = qs('#vfs-line-result');
+
+  async function doLineIntegral() {
+    if (!window.vfsScene) return;
+    const P = elP.value.trim() || '0';
+    const Q = elQ.value.trim() || '0';
+    const R = elR.value.trim() || '0';
+    const field = `(${P}, ${Q}, ${R})`;
+
+    const curve = {
+      x: elCurveX.value.trim() || '0',
+      y: elCurveY.value.trim() || '0',
+      z: elCurveZ.value.trim() || '0'
+    };
+    const tRange = [Number(elTmin.value), Number(elTmax.value)];
+
+    elCalcLine.disabled = true;
+    elLineResult.textContent = 'Calculando...';
+
+    try {
+      const res = await fetch('/api/integration/line', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, curve, tRange, steps: 200 })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || res.statusText);
+      }
+
+      const data = await res.json();
+      elLineResult.textContent = `Resultado: ${data.result.toFixed(4)}`;
+
+      if (data.points) {
+        renderCurve(window.vfsScene, data.points);
+      }
+    } catch (e) {
+      console.error(e);
+      elLineResult.textContent = 'Erro: ' + e.message;
+    } finally {
+      elCalcLine.disabled = false;
+    }
+  }
+
+  if (elCalcLine) elCalcLine.addEventListener('click', doLineIntegral);
+  if (elClearLine) elClearLine.addEventListener('click', () => {
+    clearCurve(window.vfsScene);
+    elLineResult.textContent = '';
+  });
 })();
 
 

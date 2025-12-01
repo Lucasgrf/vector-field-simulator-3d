@@ -30,22 +30,6 @@ A aplicação segue uma arquitetura cliente-servidor desacoplada:
 ### 3.2 Frontend (Three.js)
 - **Tecnologias**: Vite, Three.js, HTML/CSS.
 - **Responsabilidades**:
-    - Renderização 3D de vetores usando `InstancedMesh` para alta performance.
-    - Visualização de linhas de fluxo como polilinhas coloridas por velocidade.
-    - Interface de usuário (UI) para controle de parâmetros (funções P,Q,R, domínio, resolução).
-    - Interatividade (zoom, rotação, seleção de seeds).
-
-## 4. Resultados Atuais
-O projeto encontra-se em estágio avançado de desenvolvimento, com as seguintes funcionalidades operacionais:
-
-- **Visualização de Campos**: Renderização correta de campos vetoriais 3D definidos pelo usuário.
-- **Análise Vetorial**: Cálculo e visualização de divergente e rotacional (simbólico e numérico).
-- **Linhas de Fluxo**: Simulação de partículas e traçado de linhas de fluxo com integrador RK4 estável.
-- **Interface**: Painel de controle funcional para ajuste de parâmetros em tempo real.
-
-### 4.1 Pendências
-- **Integrais de Linha**: A funcionalidade de cálculo e visualização de integrais de linha em curvas paramétricas ainda não foi implementada no frontend nem no backend (endpoint stub).
-- **Exportação**: Funcionalidades de persistência e exportação de dados/imagens ainda não estão disponíveis.
 
 ## 5. Conclusão
 O simulador atende aos requisitos principais de visualização e análise de campos vetoriais. A arquitetura escolhida mostrou-se robusta para lidar com os cálculos matemáticos e a renderização 3D. As próximas etapas focarão na implementação das integrais de linha e refinamento da experiência do usuário.
