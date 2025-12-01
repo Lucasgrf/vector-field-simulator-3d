@@ -86,3 +86,13 @@ Aqui está o que cada botãozinho na tela faz:
     *   *Única:* Todas as linhas azuis.
     *   *Velocidade:* Muda de cor (azul -> ciano -> amarelo) dependendo da velocidade do campo naquele ponto.
 
+### 📐 Integral de Linha (Novo!)
+Agora você pode calcular o trabalho realizado pelo campo ao longo de um caminho!
+1.  **Defina a Curva:** Digite as equações paramétricas $x(t)$, $y(t)$ e $z(t)$.
+    *   *Exemplo (Círculo):* $x=\cos(t)$, $y=\sin(t)$, $z=0$.
+2.  **Intervalo t:** Escolha onde começa e onde termina o parâmetro $t$ (ex: 0 a 6.28).
+3.  **Calcular:** O sistema vai:
+    *   Desenhar a curva em **laranja** na tela.
+    *   Mostrar o resultado numérico da integral $\int \vec{F} \cdot d\vec{r}$.
+
+

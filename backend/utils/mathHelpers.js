@@ -1,7 +1,7 @@
 const math = require('mathjs');
 
 // Allowed symbols and functions for safety when parsing user input
-const ALLOWED_SYMBOLS = new Set(['x', 'y', 'z', 'pi', 'e']);
+const ALLOWED_SYMBOLS = new Set(['x', 'y', 'z', 't', 'pi', 'e']);
 const ALLOWED_FUNCTIONS = new Set([
   'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
   'sinh', 'cosh', 'tanh', 'abs', 'sign',
@@ -374,5 +374,93 @@ function integrateStreamline(fieldData, seed, opts) {
   return { points: pts, speeds: spd, seedIndex };
 }
 
+
+// ---- Line Integral ----
+
+function compileScalar(expr) {
+  const node = math.parse(expr);
+  validateNode(node);
+  return compileNode(node);
+}
+
+function calculateLineIntegral(fieldStr, curve, tRange, steps = 100) {
+  // 1. Prepare Curve
+  // curve = { x: "cos(t)", y: "sin(t)", z: "0" }
+  const xNode = math.parse(curve.x); validateNode(xNode);
+  const yNode = math.parse(curve.y); validateNode(yNode);
+  const zNode = math.parse(curve.z); validateNode(zNode);
+
+  const xFn = compileNode(xNode);
+  const yFn = compileNode(yNode);
+  const zFn = compileNode(zNode);
+
+  // Derivatives r'(t)
+  const dxNode = math.derivative(xNode, 't');
+  const dyNode = math.derivative(yNode, 't');
+  const dzNode = math.derivative(zNode, 't');
+
+  const dxFn = compileNode(dxNode);
+  const dyFn = compileNode(dyNode);
+  const dzFn = compileNode(dzNode);
+
+  // 2. Prepare Field
+  const fieldData = getCompiledField(fieldStr);
+  const [fP, fQ, fR] = fieldData.comps;
+
+  // 3. Integrate
+  const [t0, t1] = tRange;
+  const dt = (t1 - t0) / steps;
+  let integral = 0;
+  const points = [];
+
+  // Simpson's rule requires odd number of points (even number of steps), but Trapezoidal is fine.
+  // Let's use Trapezoidal for simplicity and point collection consistency.
+
+  let prevVal = 0;
+
+  for (let i = 0; i <= steps; i++) {
+    const t = t0 + i * dt;
+    const scope = { t, pi: Math.PI, e: Math.E };
+
+    // r(t)
+    const rx = xFn(scope);
+    const ry = yFn(scope);
+    const rz = zFn(scope);
+
+    points.push([rx, ry, rz]);
+
+    // r'(t)
+    const drx = dxFn(scope);
+    const dry = dyFn(scope);
+    const drz = dzFn(scope);
+
+    // F(r(t))
+    // Field scope needs x, y, z
+    const fScope = { x: rx, y: ry, z: rz, pi: Math.PI, e: Math.E };
+    const fx = fP(fScope);
+    const fy = fQ(fScope);
+    const fz = fR(fScope);
+
+    // Dot product: F . r'
+    const dot = fx * drx + fy * dry + fz * drz;
+
+    if (i === 0) {
+      integral += dot;
+    } else if (i === steps) {
+      integral += dot;
+    } else {
+      integral += 2 * dot;
+    }
+  }
+
+  // Trapezoidal: (h/2) * (y0 + 2y1 + ... + yn) -> Wait, that's trapezoidal?
+  // Trapezoidal is (h/2) * (y0 + 2y1 + ... + 2yn-1 + yn)
+  integral = (dt / 2) * integral;
+
+  return { result: integral, points };
+}
+
 module.exports.integrateStreamline = integrateStreamline;
+module.exports.calculateLineIntegral = calculateLineIntegral;
+
 
