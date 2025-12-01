@@ -1,4 +1,6 @@
 import { updateVectorField } from './vectorFieldRenderer.js';
+import { renderStreamlines, clearStreamlines } from './streamlinesRenderer.js';
+import * as THREE from 'three';
 
 // Minimal UI for Phase 0: backend health test
 (function initPhase0UI() {
@@ -57,7 +59,10 @@ import { updateVectorField } from './vectorFieldRenderer.js';
     border: '1px solid rgba(0,0,0,0.2)',
     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
     fontFamily: 'sans-serif',
-    color: '#222'
+    color: '#222',
+    maxHeight: 'calc(100vh - 24px)',
+    overflowY: 'auto',
+    overscrollBehavior: 'contain'
   });
 
   panel.innerHTML = `
@@ -122,9 +127,57 @@ import { updateVectorField } from './vectorFieldRenderer.js';
       <button id="vfs-render" style="flex:1; padding:8px; border-radius:6px; border:1px solid #1976d2; background:#2196f3; color:#fff;">Renderizar</button>
       <span id="vfs-status" style="align-self:center; font-size:12px; color:#444;"></span>
     </div>
+    <hr style="margin:12px 0; border:none; border-top:1px solid rgba(0,0,0,0.1)" />
+    <div style="font-weight:600; margin:6px 0 4px;">Linhas de Fluxo</div>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+      <label>Seeds nx</label>
+      <input id="vfs-seeds-nx" type="number" min="3" max="21" step="2" value="7" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>ny</label>
+      <input id="vfs-seeds-ny" type="number" min="3" max="21" step="2" value="7" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <span></span>
+      <label>Passo h</label>
+      <input id="vfs-h" type="number" step="0.01" value="0.1" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>maxSteps</label>
+      <input id="vfs-maxsteps" type="number" min="50" max="5000" step="50" value="400" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>Vel. desenho</label>
+      <input id="vfs-drawspeed" type="number" min="5" max="500" step="5" value="100" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label>Direção</label>
+      <select id="vfs-direction" style="grid-column: span 2; padding:6px; border-radius:6px;">
+        <option value="both" selected>Ambas</option>
+        <option value="forward">Adiante</option>
+        <option value="backward">Atrás</option>
+      </select>
+      <span></span>
+      <label>Vel. partículas</label>
+      <input id="vfs-particlespeed" type="number" min="1" max="100" step="1" value="4" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <label style="grid-column: span 3;"><input id="vfs-animate-draw" type="checkbox" checked /> Animar desenho</label>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button id="vfs-stream" style="flex:1; padding:8px; border-radius:6px; border:1px solid #1976d2; background:#42a5f5; color:#fff;">Gerar Streamlines</button>
+      <button id="vfs-clear-stream" style="flex:1; padding:8px; border-radius:6px; border:1px solid #9e9e9e; background:#e0e0e0; color:#222;">Limpar</button>
+    </div>
+    <div id="vfs-stream-status" style="margin-top:6px; font-size:12px; color:#444;"></div>
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center; margin-top:6px;">
+      <label>Cor por</label>
+      <select id="vfs-stream-color" style="grid-column: span 5; padding:6px; border-radius:6px;">
+        <option value="single">Única (azul)</option>
+        <option value="speed">Velocidade |F|</option>
+      </select>
+    </div>
   `;
 
   document.body.appendChild(panel);
+
+  // Acrescentar seção de Seeds por clique (programaticamente)
+  const seedsSection = document.createElement('div');
+  seedsSection.innerHTML = `
+    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center; margin-top:6px;">
+      <label style="grid-column: span 3;"><input id="vfs-click-seeds" type="checkbox" /> Seeds por clique</label>
+      <button id="vfs-clear-seeds" style="grid-column: span 3; padding:6px; border-radius:6px; border:1px solid #9e9e9e; background:#fafafa;">Limpar Seeds</button>
+      <span id="vfs-seed-count" style="grid-column: span 6; font-size:12px; color:#444;">0 seeds</span>
+    </div>
+  `;
+  panel.appendChild(seedsSection);
 
   const qs = (id) => panel.querySelector(id);
   const elPreset = qs('#vfs-preset');
@@ -148,6 +201,39 @@ import { updateVectorField } from './vectorFieldRenderer.js';
   const elRender = qs('#vfs-render');
   const elAuto = qs('#vfs-auto');
   const elStatus = qs('#vfs-status');
+  const elSeedsNx = qs('#vfs-seeds-nx');
+  const elSeedsNy = qs('#vfs-seeds-ny');
+  const elH = qs('#vfs-h');
+  const elMaxSteps = qs('#vfs-maxsteps');
+  const elDrawSpeed = qs('#vfs-drawspeed');
+  const elDirection = qs('#vfs-direction');
+  const elParticleSpeed = qs('#vfs-particlespeed');
+  const elAnimateDraw = qs('#vfs-animate-draw');
+  const elStreamColor = qs('#vfs-stream-color');
+  const elStreamBtn = qs('#vfs-stream');
+  const elClearStreamBtn = qs('#vfs-clear-stream');
+  const elStreamStatus = qs('#vfs-stream-status');
+  const elClickSeeds = panel.querySelector('#vfs-click-seeds');
+  const elClearSeeds = panel.querySelector('#vfs-clear-seeds');
+  const elSeedCount = panel.querySelector('#vfs-seed-count');
+
+  function splitVectorString(str) {
+    const result = [];
+    let current = '';
+    let depth = 0;
+    for (const char of str) {
+      if (char === ',' && depth === 0) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        if (char === '(') depth++;
+        if (char === ')') depth--;
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
 
   elPreset.addEventListener('change', () => {
     const v = elPreset.value;
@@ -155,10 +241,12 @@ import { updateVectorField } from './vectorFieldRenderer.js';
       // tentar extrair três componentes separados do preset "(P,Q,R)"
       try {
         const inner = v.replace(/^\(|\)$/g, '');
-        const [p, q, r] = inner.split(',');
-        elP.value = p;
-        elQ.value = q;
-        elR.value = r;
+        const parts = splitVectorString(inner);
+        if (parts.length === 3) {
+          elP.value = parts[0];
+          elQ.value = parts[1];
+          elR.value = parts[2];
+        }
       } catch (_) { /* ignore */ }
     }
   });
@@ -207,7 +295,7 @@ import { updateVectorField } from './vectorFieldRenderer.js';
     elRender.textContent = 'Renderizando...';
     elStatus.textContent = '';
     try {
-      await updateVectorField(window.vfsScene, { field, domain, resolution, mode: elMode.value, scale, radiusScale, useInstancing: false });
+      await updateVectorField(window.vfsScene, { field, domain, resolution, mode: elMode.value, scale, radiusScale, useInstancing: true });
       elStatus.textContent = 'OK';
       elStatus.style.color = '#2e7d32';
     } catch (err) {
@@ -252,11 +340,130 @@ import { updateVectorField } from './vectorFieldRenderer.js';
   }
   // Auto-apply on input changes
   [elP, elQ, elR,
-   elXmin, elXmax, elYmin, elYmax, elZmin, elZmax,
-   elNx, elNy, elNz,
-   elMode,
-   elScale, elScaleNum,
-   elRadius, elRadiusNum]
+    elXmin, elXmax, elYmin, elYmax, elZmin, elZmax,
+    elNx, elNy, elNz,
+    elMode,
+    elScale, elScaleNum,
+    elRadius, elRadiusNum]
     .forEach((el) => el.addEventListener('input', maybeAutoApply));
   elPreset.addEventListener('change', maybeAutoApply);
+
+  function clampInt(n, min, max) {
+    n = Math.round(Number(n));
+    if (!isFinite(n)) n = min;
+    return Math.max(min, Math.min(max, n));
+  }
+
+  async function doStreamlines() {
+    if (!window.vfsScene) return;
+    const P = elP.value.trim() || '0';
+    const Q = elQ.value.trim() || '0';
+    const R = elR.value.trim() || '0';
+    const field = `(${P}, ${Q}, ${R})`;
+    const x0 = Number(elXmin.value); const x1 = Number(elXmax.value);
+    const y0 = Number(elYmin.value); const y1 = Number(elYmax.value);
+    const z0 = Number(elZmin.value); const z1 = Number(elZmax.value);
+    const seedsNx = clampInt(elSeedsNx.value, 3, 21);
+    const seedsNy = clampInt(elSeedsNy.value, 3, 21);
+    const h = Number(elH.value) || 0.1;
+    const maxSteps = clampInt(elMaxSteps.value, 50, 5000);
+    const particleSpeed = Math.max(1, Math.min(100, Number(elParticleSpeed && elParticleSpeed.value) || 4));
+    const animateDraw = !!(elAnimateDraw && elAnimateDraw.checked);
+    elSeedsNx.value = seedsNx; elSeedsNy.value = seedsNy;
+    elH.value = String(h); elMaxSteps.value = String(maxSteps);
+    const drawSpeed = Math.max(5, Math.min(500, Number(elDrawSpeed && elDrawSpeed.value) || 100));
+    const domain = { x: [Math.min(x0, x1), Math.max(x0, x1)], y: [Math.min(y0, y1), Math.max(y0, y1)], z: [Math.min(z0, z1), Math.max(z0, z1)] };
+    try {
+      elStreamBtn.disabled = true;
+      elStreamStatus.textContent = 'Gerando...';
+      elStreamStatus.style.color = '#444';
+      const payload = (seedState.seeds && seedState.seeds.length)
+        ? { field, domain, seeds: seedState.seeds.slice(), h, maxSteps, direction: elDirection.value, drawSpeed, colorMode: elStreamColor.value, particleSpeed, animateDraw }
+        : { field, domain, seedsNx, seedsNy, h, maxSteps, direction: elDirection.value, drawSpeed, colorMode: elStreamColor.value, particleSpeed, animateDraw };
+      await renderStreamlines(window.vfsScene, payload);
+      elStreamStatus.textContent = 'OK';
+      elStreamStatus.style.color = '#2e7d32';
+    } catch (e) {
+      console.error('Erro streamlines:', e);
+      elStreamStatus.textContent = (e && e.message) ? e.message : 'Erro';
+      elStreamStatus.style.color = '#b71c1c';
+    } finally {
+      elStreamBtn.disabled = false;
+    }
+  }
+  elStreamBtn.addEventListener('click', doStreamlines);
+  elClearStreamBtn.addEventListener('click', () => clearStreamlines(window.vfsScene));
+
+  // Seeds por clique (plano z = meio do domínio atual)
+  const seedState = { enabled: false, seeds: [], markers: null };
+  function updateSeedCount() { if (elSeedCount) elSeedCount.textContent = `${seedState.seeds.length} seeds`; }
+  function ensureMarkerGroup() {
+    if (!seedState.markers) {
+      seedState.markers = new THREE.Group();
+      seedState.markers.name = 'vfsSeedMarkers';
+      if (window.vfsScene) window.vfsScene.add(seedState.markers);
+    }
+  }
+  function addSeedMarker(p) {
+    ensureMarkerGroup();
+    const geo = new THREE.SphereGeometry(0.06, 12, 12);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xe53935, toneMapped: false });
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(p[0], p[1], p[2]);
+    seedState.markers.add(m);
+  }
+  function clearSeeds() {
+    seedState.seeds = [];
+    updateSeedCount();
+    if (seedState.markers && window.vfsScene) {
+      window.vfsScene.remove(seedState.markers);
+      seedState.markers.children.forEach(c => { c.geometry && c.geometry.dispose(); c.material && c.material.dispose && c.material.dispose(); });
+      seedState.markers = null;
+    }
+  }
+  if (elClearSeeds) elClearSeeds.addEventListener('click', clearSeeds);
+  if (elClickSeeds) elClickSeeds.addEventListener('change', () => { seedState.enabled = !!elClickSeeds.checked; });
+  updateSeedCount();
+
+  const raycaster = new THREE.Raycaster();
+  function onCanvasClick(ev) {
+    if (!seedState.enabled) return;
+    const renderer = window.vfsRenderer;
+    const camera = window.vfsCamera;
+    if (!renderer || !camera) return;
+    const zmin = Number(elZmin.value), zmax = Number(elZmax.value);
+    const zmid = (zmin + zmax) / 2;
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -zmid);
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera({ x, y }, camera);
+    const point = new THREE.Vector3();
+    if (raycaster.ray.intersectPlane(plane, point)) {
+      // Clampar seed ao domínio atual (x,y)
+      const xmin = Number(elXmin.value), xmax = Number(elXmax.value);
+      const ymin = Number(elYmin.value), ymax = Number(elYmax.value);
+      const px = Math.max(Math.min(point.x, Math.max(xmin, xmax)), Math.min(xmin, xmax));
+      const py = Math.max(Math.min(point.y, Math.max(ymin, ymax)), Math.min(ymin, ymax));
+      const p = [px, py, point.z];
+      seedState.seeds.push(p);
+      addSeedMarker(p);
+      updateSeedCount();
+    }
+  }
+  if (window.vfsRenderer) {
+    window.vfsRenderer.domElement.addEventListener('pointerdown', onCanvasClick);
+  }
 })();
+
+
+
+
+
+
+
+
+
+
+
+
