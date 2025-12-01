@@ -140,7 +140,7 @@ import * as THREE from 'three';
       <label>maxSteps</label>
       <input id="vfs-maxsteps" type="number" min="50" max="5000" step="50" value="400" style="grid-column: span 2; padding:4px; border-radius:6px;" />
       <label>Vel. desenho</label>
-      <input id="vfs-drawspeed" type="number" min="5" max="200" step="5" value="20" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-drawspeed" type="number" min="5" max="500" step="5" value="100" style="grid-column: span 2; padding:4px; border-radius:6px;" />
       <label>Direção</label>
       <select id="vfs-direction" style="grid-column: span 2; padding:6px; border-radius:6px;">
         <option value="both" selected>Ambas</option>
@@ -217,16 +217,36 @@ import * as THREE from 'three';
   const elClearSeeds = panel.querySelector('#vfs-clear-seeds');
   const elSeedCount = panel.querySelector('#vfs-seed-count');
 
+  function splitVectorString(str) {
+    const result = [];
+    let current = '';
+    let depth = 0;
+    for (const char of str) {
+      if (char === ',' && depth === 0) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        if (char === '(') depth++;
+        if (char === ')') depth--;
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
   elPreset.addEventListener('change', () => {
     const v = elPreset.value;
     if (v && v !== 'custom') {
       // tentar extrair três componentes separados do preset "(P,Q,R)"
       try {
         const inner = v.replace(/^\(|\)$/g, '');
-        const [p, q, r] = inner.split(',');
-        elP.value = p;
-        elQ.value = q;
-        elR.value = r;
+        const parts = splitVectorString(inner);
+        if (parts.length === 3) {
+          elP.value = parts[0];
+          elQ.value = parts[1];
+          elR.value = parts[2];
+        }
       } catch (_) { /* ignore */ }
     }
   });
@@ -275,7 +295,7 @@ import * as THREE from 'three';
     elRender.textContent = 'Renderizando...';
     elStatus.textContent = '';
     try {
-      await updateVectorField(window.vfsScene, { field, domain, resolution, mode: elMode.value, scale, radiusScale, useInstancing: false });
+      await updateVectorField(window.vfsScene, { field, domain, resolution, mode: elMode.value, scale, radiusScale, useInstancing: true });
       elStatus.textContent = 'OK';
       elStatus.style.color = '#2e7d32';
     } catch (err) {
@@ -320,11 +340,11 @@ import * as THREE from 'three';
   }
   // Auto-apply on input changes
   [elP, elQ, elR,
-   elXmin, elXmax, elYmin, elYmax, elZmin, elZmax,
-   elNx, elNy, elNz,
-   elMode,
-   elScale, elScaleNum,
-   elRadius, elRadiusNum]
+    elXmin, elXmax, elYmin, elYmax, elZmin, elZmax,
+    elNx, elNy, elNz,
+    elMode,
+    elScale, elScaleNum,
+    elRadius, elRadiusNum]
     .forEach((el) => el.addEventListener('input', maybeAutoApply));
   elPreset.addEventListener('change', maybeAutoApply);
 
@@ -351,8 +371,8 @@ import * as THREE from 'three';
     const animateDraw = !!(elAnimateDraw && elAnimateDraw.checked);
     elSeedsNx.value = seedsNx; elSeedsNy.value = seedsNy;
     elH.value = String(h); elMaxSteps.value = String(maxSteps);
-    const drawSpeed = Math.max(5, Math.min(200, Number(elDrawSpeed && elDrawSpeed.value) || 20));
-    const domain = { x: [Math.min(x0,x1), Math.max(x0,x1)], y: [Math.min(y0,y1), Math.max(y0,y1)], z: [Math.min(z0,z1), Math.max(z0,z1)] };
+    const drawSpeed = Math.max(5, Math.min(500, Number(elDrawSpeed && elDrawSpeed.value) || 100));
+    const domain = { x: [Math.min(x0, x1), Math.max(x0, x1)], y: [Math.min(y0, y1), Math.max(y0, y1)], z: [Math.min(z0, z1), Math.max(z0, z1)] };
     try {
       elStreamBtn.disabled = true;
       elStreamStatus.textContent = 'Gerando...';

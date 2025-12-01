@@ -3,7 +3,7 @@ const math = require('mathjs');
 // Allowed symbols and functions for safety when parsing user input
 const ALLOWED_SYMBOLS = new Set(['x', 'y', 'z', 'pi', 'e']);
 const ALLOWED_FUNCTIONS = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
   'sinh', 'cosh', 'tanh', 'abs', 'sign',
   'sqrt', 'exp', 'log', 'ln', 'pow', 'min', 'max',
   'add', 'subtract', 'multiply', 'divide', // mathjs operator names (rarely used directly)
@@ -251,8 +251,8 @@ function vecLen(a) { return Math.hypot(a[0], a[1], a[2]); }
 
 function inBox(p, bbox) {
   return p[0] >= bbox.x[0] && p[0] <= bbox.x[1]
-      && p[1] >= bbox.y[0] && p[1] <= bbox.y[1]
-      && p[2] >= bbox.z[0] && p[2] <= bbox.z[1];
+    && p[1] >= bbox.y[0] && p[1] <= bbox.y[1]
+    && p[2] >= bbox.z[0] && p[2] <= bbox.z[1];
 }
 
 function rk4Step(fieldData, p, h) {
@@ -261,9 +261,9 @@ function rk4Step(fieldData, p, h) {
   const k3 = evaluateAtPoint(fieldData, vecAdd(p, vecScale(k2, h / 2)));
   const k4 = evaluateAtPoint(fieldData, vecAdd(p, vecScale(k3, h)));
   const sum = [
-    (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) / 6,
-    (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]) / 6,
-    (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]) / 6,
+    (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]) / 6,
+    (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]) / 6,
+    (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2]) / 6,
   ];
   return vecAdd(p, vecScale(sum, h));
 }
@@ -283,10 +283,14 @@ function integrateStreamline(fieldData, seed, opts) {
     z: [Math.min(bbox.z[0], bbox.z[1]), Math.max(bbox.z[0], bbox.z[1])],
   };
 
+  const minDist = 0.05; // Distância mínima espacial entre pontos para evitar aglomeração
+  const distSq = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+
   const forward = [];
   const fSpeeds = [];
   let p = seed.slice();
-  // Se a velocidade no seed for ~0, tente deslocar levemente para fora do ponto crítico
+
+  // Nudge logic (mantida)
   const seedV = evaluateAtPoint(fieldData, p);
   let seedSpeed = vecLen(seedV);
   if (seedSpeed < minSpeed) {
@@ -295,13 +299,13 @@ function integrateStreamline(fieldData, seed, opts) {
     const rz = clampBox.z[1] - clampBox.z[0];
     const base = (Math.abs(rx) + Math.abs(ry) + Math.abs(rz)) / 3 || 1;
     const dirs = [
-      [1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1],
-      [1,1,1],[-1,1,1],[1,-1,1],[1,1,-1],[-1,-1,1],[-1,1,-1],[1,-1,-1],[-1,-1,-1]
+      [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
+      [1, 1, 1], [-1, 1, 1], [1, -1, 1], [1, 1, -1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, -1]
     ];
     outer: for (let k = 1; k <= 4; k++) {
       const eps = (base * 1e-3) * k;
       for (const d of dirs) {
-        const np = [p[0] + d[0]*eps, p[1] + d[1]*eps, p[2] + d[2]*eps];
+        const np = [p[0] + d[0] * eps, p[1] + d[1] * eps, p[2] + d[2] * eps];
         if (!inBox(np, clampBox)) continue;
         const sv = evaluateAtPoint(fieldData, np);
         const ss = vecLen(sv);
@@ -309,15 +313,23 @@ function integrateStreamline(fieldData, seed, opts) {
       }
     }
   }
+
   forward.push(p);
   fSpeeds.push(seedSpeed);
+
+  let lastP = p;
   for (let i = 0; i < maxSteps; i++) {
     const v = evaluateAtPoint(fieldData, p);
     if (vecLen(v) < minSpeed) break;
     const np = rk4Step(fieldData, p, h);
     if (!inBox(np, clampBox)) break;
-    forward.push(np);
-    fSpeeds.push(vecLen(evaluateAtPoint(fieldData, np)));
+
+    // Filtro espacial
+    if (distSq(np, lastP) >= minDist * minDist) {
+      forward.push(np);
+      fSpeeds.push(vecLen(evaluateAtPoint(fieldData, np)));
+      lastP = np;
+    }
     p = np;
   }
 
@@ -325,14 +337,23 @@ function integrateStreamline(fieldData, seed, opts) {
 
   const backward = [];
   const bSpeeds = [];
-  p = seed.slice();
+  p = seed.slice(); // Reiniciar do seed original (ou nudged?) - idealmente do nudged p inicial
+  // Nota: se houve nudge, o 'seed' original pode estar na estagnação. O 'p' inicial do forward é o nudged.
+  // Vamos usar o primeiro ponto do forward como start do backward para continuidade
+  p = forward[0];
+  lastP = p;
+
   for (let i = 0; i < maxSteps; i++) {
     const v = evaluateAtPoint(fieldData, p);
     if (vecLen(v) < minSpeed) break;
     const np = rk4Step(fieldData, p, -h);
     if (!inBox(np, clampBox)) break;
-    backward.push(np);
-    bSpeeds.push(vecLen(evaluateAtPoint(fieldData, np)));
+
+    if (distSq(np, lastP) >= minDist * minDist) {
+      backward.push(np);
+      bSpeeds.push(vecLen(evaluateAtPoint(fieldData, np)));
+      lastP = np;
+    }
     p = np;
   }
   backward.reverse();
@@ -340,9 +361,10 @@ function integrateStreamline(fieldData, seed, opts) {
   const seedIndex = backward.length;
   let pts = backward.concat(forward);
   let spd = bSpeeds.concat(fSpeeds);
-  // Garantir ao menos 2 pontos para visualização/animação
+
+  // Garantir ao menos 2 pontos
   if (pts.length < 2) {
-    const tiny = Math.max((clampBox.x[1]-clampBox.x[0] + clampBox.y[1]-clampBox.y[0] + clampBox.z[1]-clampBox.z[0]) / 3 * 1e-3, 1e-4);
+    const tiny = Math.max((clampBox.x[1] - clampBox.x[0] + clampBox.y[1] - clampBox.y[0] + clampBox.z[1] - clampBox.z[0]) / 3 * 1e-3, 1e-4);
     const cand = [pts[0][0] + tiny, pts[0][1], pts[0][2]];
     if (inBox(cand, clampBox)) {
       pts.push(cand);

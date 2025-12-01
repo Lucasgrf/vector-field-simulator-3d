@@ -204,17 +204,21 @@ export async function renderStreamlines(scene, options = {}) {
             ps.mesh.position.set(ps.positions[pIdx * 3], ps.positions[pIdx * 3 + 1], ps.positions[pIdx * 3 + 2]);
             keepAnimating = true;
           } else {
-            if (!ps.mesh.visible) ps.mesh.visible = true; // Tornar visível
-
+            // Atualizar índice (mover)
             ps.idx += particleSpeed * rel * dt;
-            if (ps.idx >= ps.count - 1) ps.idx = ps.seedIndex || 0; // loop para o início
+            if (ps.idx >= ps.count - 1) ps.idx = 0; // loop para o início
 
             const i0 = Math.floor(ps.idx);
+
+            // Verificar se está na parte desenhada
             if (animateDraw && i0 >= allowed - 1) {
               ps.mesh.visible = false;
               keepAnimating = true;
               continue;
             }
+
+            // Se chegou aqui, está visível
+            if (!ps.mesh.visible) ps.mesh.visible = true;
 
             const t = ps.idx - i0;
             const p0x = ps.positions[i0 * 3 + 0], p0y = ps.positions[i0 * 3 + 1], p0z = ps.positions[i0 * 3 + 2];

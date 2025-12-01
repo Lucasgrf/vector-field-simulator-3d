@@ -170,12 +170,13 @@ export async function renderVectorField(scene, options = {}) {
   const cone = buildConeGeometry();
   const group = new THREE.Group();
   if (useInstancing) {
-    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, toneMapped: false, side: THREE.DoubleSide });
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, side: THREE.DoubleSide });
     const mesh = new THREE.InstancedMesh(cone, mat, count);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    if (!mesh.instanceColor) {
-      mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
-    }
+
+    const colors = new Float32Array(count * 3);
+    mesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
+
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i++) {
       const p = points[i];
@@ -191,12 +192,16 @@ export async function renderVectorField(scene, options = {}) {
       dummy.scale.set(radius, len, radius);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
+
       const cval = colorVals[i];
       const t = normalize01(cval, minVal, maxVal);
       const c = colormap(t);
-      mesh.setColorAt(i, c);
+      colors[i * 3 + 0] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
     }
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.instanceColor.needsUpdate = true;
     group.add(mesh);
   } else {
     // Fallback sem instancing: um Mesh por seta com material colorido

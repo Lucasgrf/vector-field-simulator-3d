@@ -29,11 +29,7 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
-// Cubo simples no centro
-const cubeGeo = new THREE.BoxGeometry(1, 1, 1);
-const cubeMat = new THREE.MeshStandardMaterial({ color: 0x2196f3, metalness: 0.1, roughness: 0.8 });
-const cube = new THREE.Mesh(cubeGeo, cubeMat);
-scene.add(cube);
+// Cubo removido (placeholder)
 
 camera.position.set(3, 3, 8);
 camera.lookAt(0, 0, 0);
@@ -59,9 +55,7 @@ window.addEventListener('resize', () => {
 
 function animate() {
   requestAnimationFrame(animate);
-  // Animação sutil no cubo para dar vida
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.015;
+  // Animação sutil no cubo removida
   controls.update();
   renderer.render(scene, camera);
 }
