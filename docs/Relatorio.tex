@@ -1,0 +1,416 @@
+\documentclass[
+	12pt,				% tamanho da fonte
+	openright,			% capítulos começam em pág ímpar (insere página vazia se preciso)
+	oneside,			% para impressão em apenas um lado. Use twoside para frente e verso.
+	a4paper,			% tamanho do papel. 
+	english,			% idioma adicional para hifenização
+	brazil				% o último idioma é o principal do documento
+	]{abntex2}
+
+% ---
+% Pacotes básicos 
+% ---
+\usepackage{lmodern}			% Usa a fonte Latin Modern			
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{color}				% Controle das cores
+\usepackage{graphicx}			% Inclusão de gráficos
+\usepackage{microtype} 			% para melhorias de justificação
+\usepackage{amsmath, amssymb}   % Pacotes matemáticos
+\usepackage{listings}           % Para códigos fonte
+\usepackage{float}              % Para posicionamento de figuras
+
+% ---
+% Pacotes de citações
+% ---
+\usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+
+% ---
+% Configurações de pacotes
+% ---
+
+% Configuração de listings para código
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break, const, let, async, await, export, import, default, throw},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{codegreen}\ttfamily,
+  stringstyle=\color{codepurple}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    extendedchars=true,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+             {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+             {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+             {À}{{\`A}}1 {È}{{\`E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+             {ã}{{\~a}}1 {õ}{{\~o}}1 {Ã}{{\~A}}1 {Õ}{{\~O}}1
+             {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1
+             {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+             {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+}
+\lstset{style=mystyle}
+
+% ---
+% Informações de dados para CAPA e FOLHA DE ROSTO
+% ---
+\titulo{Simulador Interativo 3D de Campos Vetoriais}
+\autor{SEAL\\ \small{Lucas Rocha, Kaio Ribeiro, Izac Regis, Gabriel Garcia, Mikael Lopes, Felipe Araujo, Hudson Silva}}
+\local{Brasil}
+\data{\today}
+\orientador{Dra. Melina Silva de Lima}
+\instituicao{%
+  Jala University
+  \par
+  Departamento de Matemática e Computação
+  \par
+  Disciplina de Cálculo 2}
+\tipotrabalho{Relatório de Projeto}
+\preambulo{Relatório apresentado como requisito parcial para obtenção de aprovação na disciplina de Cálculo 2, descrevendo o desenvolvimento e implementação de um simulador de campos vetoriais.}
+
+% ---
+% Configurações de aparência do PDF final
+% ---
+\definecolor{blue}{RGB}{41,5,195}
+\makeatletter
+\hypersetup{
+     	%pagebackref=true,
+		pdftitle={\@title}, 
+		pdfauthor={\@author},
+    	pdfsubject={\imprimirpreambulo},
+	    pdfcreator={LaTeX with abnTeX2},
+		pdfkeywords={abnt}{latex}{abntex}{abntex2}{relatório}, 
+		colorlinks=true,       		% false: box links; true: colored links
+    	linkcolor=blue,          	% color of internal links
+    	citecolor=blue,        		% color of links to bibliography
+    	filecolor=magenta,      		% color of file links
+		urlcolor=blue,
+		bookmarksdepth=4
+}
+\makeatother
+
+% ---
+% Compila o indice
+% ---
+\makeindex
+
+% ---
+% Customização da Capa (Logo no topo esquerdo)
+% ---
+\renewcommand{\imprimircapa}{%
+  \begin{capa}%
+    \begin{flushleft}
+       \includegraphics[width=2.5cm]{logo.png}
+    \end{flushleft}
+    \center
+    \ABNTEXchapterfont\Large\imprimirinstituicao
+    \vfill
+    \ABNTEXchapterfont\bfseries\LARGE\imprimirtitulo
+    \vfill
+    \large\imprimirautor
+    \vfill
+    \large\imprimirlocal
+    \par
+    \large\imprimirdata
+    \vspace*{1cm}
+  \end{capa}
+}
+
+% ---
+% Customização da Numeração de Página (Superior Direito)
+% ---
+\makepagestyle{abntheadings}
+\makeevenhead{abntheadings}{}{}{\thepage}
+\makeoddhead{abntheadings}{}{}{\thepage}
+\makeevenfoot{abntheadings}{}{}{}
+\makeoddfoot{abntheadings}{}{}{}
+
+% ---
+% Customização da Capa (Logo no topo central - Padrão ABNT)
+% ---
+\renewcommand{\imprimircapa}{%
+  \begin{capa}%
+    \center
+    \includegraphics[width=3cm]{logo.png} \\
+    \vspace{0.5cm}
+    \ABNTEXchapterfont\Large\imprimirinstituicao
+    \vfill
+    \ABNTEXchapterfont\bfseries\LARGE\imprimirtitulo
+    \vfill
+    \large\imprimirautor
+    \vfill
+    \large\imprimirlocal
+    \par
+    \large\imprimirdata
+    \vspace*{1cm}
+  \end{capa}
+}
+
+% ---
+% Início do documento
+% ---
+\begin{document}
+
+% Seleciona o idioma principal (para hifenização)
+\selectlanguage{brazil}
+
+% Retira espaço extra obsoleto entre as frases.
+\frenchspacing 
+
+% ----------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% ----------------------------------------------------------
+% \pretextual
+
+% ---
+% Capa
+% ---
+\imprimircapa
+% ---
+
+% ---
+% Folha de rosto
+% ---
+\imprimirfolhaderosto
+% ---
+
+% ---
+% Resumo
+% ---
+\begin{resumo}
+ Neste trabalho, desenvolvemos um simulador interativo de campos vetoriais em 3D como parte da avaliação final de Cálculo 2. Nossa intenção foi criar algo que não apenas resolvesse as equações, mas que nos ajudasse a "ver" a matemática acontecendo. Utilizamos Node.js no servidor para garantir que os cálculos fossem precisos e Three.js no navegador para criar uma experiência visual fluida. Durante o desenvolvimento, conseguimos implementar desde a visualização básica de vetores até a animação de linhas de fluxo usando métodos numéricos, o que nos permitiu explorar na prática conceitos como divergente e rotacional que víamos em sala de aula.
+
+ \vspace{\onelineskip}
+    
+ \noindent
+ \textbf{Palavras-chave}: Cálculo Vetorial. Simulação 3D. Node.js. Three.js. Runge-Kutta.
+\end{resumo}
+% ---
+
+% ---
+% inserir lista de ilustrações
+% ---
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+% ---
+
+% ---
+% inserir o sumario
+% ---
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+% ---
+
+% ----------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% ----------------------------------------------------------
+\textual
+\setcounter{page}{1}
+
+% ----------------------------------------------------------
+% Introdução
+% ----------------------------------------------------------
+\chapter{Introdução}
+
+Quem estuda cálculo vetorial sabe que nem sempre é fácil visualizar o que está acontecendo apenas olhando para as equações. Campos eletromagnéticos, fluxo de fluidos ou gradientes de temperatura são fenômenos tridimensionais que, no papel, acabam parecendo apenas um amontoado de números e letras. Foi pensando nessa dificuldade, que também sentimos durante o curso, que decidimos criar este simulador.
+
+\section{Objetivo}
+Nosso principal objetivo foi construir uma ferramenta onde pudéssemos digitar uma fórmula matemática e ver, instantaneamente, como aquele campo se comporta no espaço. Queríamos que o simulador fosse capaz de:
+\begin{itemize}
+    \item Mostrar os vetores em 3D de qualquer função que a gente inventasse.
+    \item Calcular "sozinho" o divergente e o rotacional, mostrando isso visualmente com cores.
+    \item Desenhar as linhas de fluxo, ou seja, soltar uma "partícula" no campo e ver para onde ela vai.
+    \item Calcular integrais de linha, para conferirmos os resultados dos exercícios.
+\end{itemize}
+
+\section{Motivação}
+A motivação veio da vontade de unir programação com a matemática. Acreditamos que quando você programa o comportamento de um conceito matemático, você é obrigado a entendê-lo a fundo. Além disso, queríamos entregar algo que pudesse ser usado por outros colegas ou até em aulas futuras para facilitar o entendimento desses conceitos abstratos.
+
+% ----------------------------------------------------------
+% Fundamentação Teórica
+% ----------------------------------------------------------
+\chapter{Fundamentação Teórica}
+
+Neste capítulo, apresentamos os conceitos matemáticos que formam a base do simulador.
+
+\section{Campos Vetoriais}
+Um campo vetorial em $\mathbb{R}^3$ é uma função $\vec{F}$ que associa a cada ponto $(x,y,z)$ um vetor tridimensional:
+\begin{equation}
+\vec{F}(x,y,z) = P(x,y,z)\mathbf{i} + Q(x,y,z)\mathbf{j} + R(x,y,z)\mathbf{k}
+\end{equation}
+onde $P, Q, R$ são funções escalares das coordenadas \cite{stewart, guidorizzi, anton}.
+
+\textbf{Interpretação:} Entendemos o campo vetorial como uma distribuição de vetores onde cada ponto possui uma direção e intensidade definidas. No nosso simulador, isso é visualizado como um espaço preenchido por setas, onde cada uma mostra, por exemplo, a direção e velocidade de um fluido naquele local específico.
+
+\section{Operadores Diferenciais}
+
+\subsection{Divergente}
+O divergente de um campo vetorial $\vec{F}$, denotado por $\text{div } \vec{F}$ ou $\nabla \cdot \vec{F}$, é uma medida escalar da tendência do fluido de divergir ou convergir em um ponto. É definido por:
+\begin{equation}
+\text{div } \vec{F} = \frac{\partial P}{\partial x} + \frac{\partial Q}{\partial y} + \frac{\partial R}{\partial z}
+\end{equation}
+
+\textbf{Interpretação:} O divergente nos diz se um ponto está gerando ou consumindo fluido. Em nossa implementação, usamos isso para identificar \textbf{fontes} (onde o fluido "nasce", divergente positivo) e \textbf{sumidouros} (onde o fluido "morre", divergente negativo). Se o valor for zero, entendemos que o fluido apenas passa pelo ponto sem ser criado ou destruído.
+
+\subsection{Rotacional}
+O rotacional, denotado por $\text{rot } \vec{F}$ ou $\nabla \times \vec{F}$, é um vetor que mede a tendência de rotação do campo em torno de um ponto. Sua expressão é dada pelo determinante formal:
+\begin{equation}
+\nabla \times \vec{F} = \left( \frac{\partial R}{\partial y} - \frac{\partial Q}{\partial z} \right)\mathbf{i} + \left( \frac{\partial P}{\partial z} - \frac{\partial R}{\partial x} \right)\mathbf{j} + \left( \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y} \right)\mathbf{k}
+\end{equation}
+
+\textbf{Interpretação:} O rotacional foi interpretado como a capacidade do campo de fazer algo girar. A analogia que utilizamos para validar nossos resultados foi a de uma pequena roda de pás: se o campo fizesse essa roda girar em um ponto, o rotacional seria não nulo. A direção do vetor rotacional seria o eixo desse giro.
+
+\section{Linhas de Fluxo e Integração Numérica}
+As linhas de fluxo são curvas $\vec{r}(t)$ tangentes ao campo vetorial em todos os pontos. Elas satisfazem a equação diferencial ordinária (EDO):
+\begin{equation}
+\frac{d\vec{r}}{dt} = \vec{F}(\vec{r}(t))
+\end{equation}
+
+\textbf{Interpretação:} As linhas de fluxo representam a trajetória real que uma partícula seguiria. No projeto, calculamos isso passo a passo para desenhar o caminho exato que uma "folha" percorreria se fosse solta na correnteza do campo vetorial.
+
+Para resolver essa EDO computacionalmente, utilizamos o método de Runge-Kutta de 4ª ordem (RK4), que oferece maior precisão que o método de Euler \cite{ruggiero, burden}. O passo de integração é dado por:
+\begin{align*}
+\vec{k}_1 &= \vec{F}(\vec{r}_n) \\
+\vec{k}_2 &= \vec{F}(\vec{r}_n + \frac{h}{2}\vec{k}_1) \\
+\vec{k}_3 &= \vec{F}(\vec{r}_n + \frac{h}{2}\vec{k}_2) \\
+\vec{k}_4 &= \vec{F}(\vec{r}_n + h\vec{k}_3) \\
+\vec{r}_{n+1} &= \vec{r}_n + \frac{h}{6}(\vec{k}_1 + 2\vec{k}_2 + 2\vec{k}_3 + \vec{k}_4)
+\end{align*}
+
+% ----------------------------------------------------------
+% Metodologia e Implementação
+% ----------------------------------------------------------
+\chapter{Metodologia e Implementação}
+
+Para tirar o projeto do papel, decidimos usar tecnologias web modernas. A ideia era que qualquer pessoa pudesse acessar o simulador pelo navegador, sem precisar instalar nada complicado.
+
+\section{Arquitetura do Sistema}
+Dividimos o projeto em duas partes para organizar melhor o código:
+\begin{itemize}
+    \item \textbf{Backend (Node.js)}: É o "cérebro" matemático. Escolhemos Node.js pela facilidade de trabalhar com JavaScript e pela disponibilidade de bibliotecas matemáticas robustas.
+    \item \textbf{Frontend (Three.js)}: É a parte visual. Usamos Three.js porque é a biblioteca padrão de mercado para 3D na web e permite renderizar muita coisa sem travar o computador \cite{webgl}.
+\end{itemize}
+
+\section{Implementação do Backend}
+No servidor, nosso maior desafio foi fazer o computador entender as fórmulas que o usuário digita. Usamos a biblioteca \texttt{mathjs} \cite{mathjs} para isso.
+
+\subsection{Lidando com as Fórmulas}
+Quando o usuário digita algo como ``x*y'', o sistema cria uma árvore de processamento (AST). Isso foi ótimo porque nos permitiu não só calcular o valor numérico, mas também derivar as funções simbolicamente. Assim, conseguimos o valor exato do divergente e do rotacional na maioria dos casos, recorrendo a métodos numéricos apenas quando a derivada simbólica era muito complexa.
+
+O trecho abaixo mostra como implementamos o cálculo numérico (diferenças finitas) como um "plano B":
+
+\begin{lstlisting}[language=JavaScript, caption={Cálculo numérico do divergente no backend}]
+function evaluateDivergenceAtPoint(fieldData, point, { h = 1e-3 } = {}) {
+  // ... (código simplificado)
+  const dPx = numericPartial(fP, point, 'x', h);
+  const dQy = numericPartial(fQ, point, 'y', h);
+  const dRz = numericPartial(fR, point, 'z', h);
+  return dPx + dQy + dRz;
+}
+\end{lstlisting}
+
+\subsection{Traçando as Linhas de Fluxo}
+Para desenhar as linhas de fluxo, precisávamos resolver a equação diferencial $\vec{r}'(t) = \vec{F}(\vec{r}(t))$. Implementamos o método Runge-Kutta de 4ª ordem (RK4) "na mão". Escolhemos o RK4 em vez do método de Euler porque, nos nossos testes iniciais, o método de Euler errava muito em curvas fechadas (como círculos), fazendo a espiral sair do curso. O RK4 se mostrou bem mais estável.
+
+\section{Implementação do Frontend}
+No visual, queríamos algo bonito e rápido. O problema é que desenhar milhares de setas pode deixar o site lento.
+
+\subsection{Otimização com InstancedMesh}
+Descobrimos uma técnica chamada \textit{Instanced Rendering} no Three.js. Basicamente, em vez de criar 1000 objetos de seta, criamos apenas um modelo na memória da placa de vídeo e dizemos "desenhe isso 1000 vezes nessas posições". Isso fez o simulador rodar liso mesmo em computadores mais fracos.
+
+\begin{lstlisting}[language=JavaScript, caption={Uso de InstancedMesh para renderização de vetores}]
+const mesh = new THREE.InstancedMesh(coneGeometry, material, count);
+for (let i = 0; i < count; i++) {
+  // Posicionamos cada cópia da seta conforme o campo vetorial
+  dummy.position.set(p[0], p[1], p[2]);
+  dummy.quaternion.setFromUnitVectors(yAxis, dir);
+  dummy.updateMatrix();
+  mesh.setMatrixAt(i, dummy.matrix);
+}
+\end{lstlisting}
+
+\subsection{Cores que Falam}
+Decidimos usar cores para representar a intensidade do campo. Vetores pequenos ficam azuis e vetores grandes ficam vermelhos. Isso ajuda muito a identificar "de cara" onde o campo é mais forte ou onde o divergente é maior, sem precisar ficar olhando números.
+
+% ----------------------------------------------------------
+% Resultados
+% ----------------------------------------------------------
+\chapter{Resultados}
+
+Depois de tudo implementado, fizemos vários testes para garantir que os cálculos estavam batendo com a teoria.
+
+\section{Campo Radial (Fonte)}
+Testamos o campo $\vec{F}(x,y,z) = (x, y, z)$. Visualmente, vimos todas as setas "fugindo" da origem, o que era esperado. Quando pedimos para calcular o divergente, o sistema retornou 3 em todos os pontos. Como as setas ficaram todas da mesma cor (indicando valor constante), confirmamos que a visualização do divergente estava correta.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{radial.png}
+    \caption{Visualização do Divergente no Campo Radial}
+    \label{fig:radial}
+\end{figure}
+
+\section{Campo de Rotação}
+Outro teste interessante foi com o campo $\vec{F}(x,y,z) = (-y, x, 0)$. As setas formaram um redemoinho em torno do eixo Z. Ao soltar uma partícula nesse campo, ela desenhou um círculo perfeito, voltando para o ponto de origem. Isso nos deixou confiantes de que o integrador RK4 estava funcionando bem, pois não houve perda de energia (a espiral não abriu nem fechou). O rotacional calculado foi $(0, 0, 2)$, exatamente como aprendemos em aula.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{rotacional.png}
+    \caption{Linhas de Fluxo e Rotacional}
+    \label{fig:rotacional}
+\end{figure}
+
+\section{Integrais de Linha}
+Também validamos a integral de linha. Configuramos uma trajetória circular e pedimos para integrar o campo de rotação nela. O resultado numérico foi muito próximo de $2\pi$, com um erro desprezível devido à aproximação numérica, validando nossa implementação da regra dos trapézios.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{integral-linha.png}
+    \caption{Cálculo da Integral de Linha}
+    \label{fig:integral}
+\end{figure}
+
+\chapter{Conclusão}
+
+Fazer este projeto foi uma experiência muito rica. Conseguimos sair da teoria e ver as equações de Cálculo 2 funcionando na prática. A escolha de usar tecnologias web foi acertada, pois conseguimos criar uma interface bonita e acessível.
+
+Claro que nem tudo foi fácil; apanhamos um pouco para fazer a performance gráfica ficar boa e para tratar as singularidades matemáticas (divisões por zero), mas o resultado final ficou muito satisfatório. Para o futuro, pensamos em adicionar superfícies paramétricas e talvez até visualizar os Teoremas de Stokes e Gauss diretamente na tela.
+
+% ----------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% ----------------------------------------------------------
+\postextual
+
+% ----------------------------------------------------------
+% Referências bibliográficas
+% ----------------------------------------------------------
+\bibliography{ref}
+
+\end{document}

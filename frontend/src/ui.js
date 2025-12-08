@@ -48,154 +48,154 @@ import * as THREE from 'three';
 // UI principal: controle de campo e domínio
 (function initFieldUI() {
   const panel = document.createElement('div');
-  Object.assign(panel.style, {
-    position: 'fixed',
-    top: '12px',
-    left: '12px',
-    zIndex: '1000',
-    width: '300px',
-    padding: '12px',
-    borderRadius: '8px',
-    background: 'rgba(255,255,255,0.9)',
-    border: '1px solid rgba(0,0,0,0.2)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    fontFamily: 'sans-serif',
-    color: '#222',
-    maxHeight: 'calc(100vh - 24px)',
-    overflowY: 'auto',
-    overscrollBehavior: 'contain'
-  });
+  panel.className = 'control-panel';
 
   panel.innerHTML = `
-    <div style="font-weight:600; margin-bottom:8px;">Campo Vetorial (P, Q, R)</div>
-    <div style="display:grid; grid-template-columns: 1fr; gap:6px;">
-      <select id="vfs-preset" style="padding:6px; border-radius:6px;">
+    <div class="control-panel-title">Campo Vetorial (P, Q, R)</div>
+    <div class="input-grid">
+      <select id="vfs-preset" class="input">
         <option value="custom">— Presets —</option>
         <option value="(x,y,z)">Radial (x, y, z)</option>
         <option value="(-y,x,0)">Rotacional plano (−y, x, 0)</option>
         <option value="(-x,-y,-z)">Sumidouro (−x, −y, −z)</option>
         <option value="(-y,x,0.2*z)">Swirl 3D (−y, x, 0.2z)</option>
       </select>
-      <input id="vfs-P" placeholder="P(x,y,z)" value="x" style="padding:6px; border-radius:6px;" />
-      <input id="vfs-Q" placeholder="Q(x,y,z)" value="y" style="padding:6px; border-radius:6px;" />
-      <input id="vfs-R" placeholder="R(x,y,z)" value="z" style="padding:6px; border-radius:6px;" />
+      <input id="vfs-P" placeholder="P(x,y,z)" value="x" class="input" />
+      <input id="vfs-Q" placeholder="Q(x,y,z)" value="y" class="input" />
+      <input id="vfs-R" placeholder="R(x,y,z)" value="z" class="input" />
     </div>
-    <div style="font-weight:600; margin:8px 0 4px;">Colorir por</div>
-    <select id="vfs-mode" style="padding:6px; border-radius:6px; width:100%;">
+    
+    <div class="control-group-title">Colorir por</div>
+    <select id="vfs-mode" class="input">
       <option value="magnitude" selected>Magnitude do campo |F|</option>
       <option value="div">Divergente div F</option>
       <option value="curl">Rotacional |curl F|</option>
     </select>
-    <div style="font-weight:600; margin:8px 0 4px;">Domínio</div>
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
-      <label style="grid-column: span 1;">x</label>
-      <input id="vfs-xmin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <input id="vfs-xmax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <span></span>
-      <label style="grid-column: span 1;">y</label>
-      <input id="vfs-ymin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <input id="vfs-ymax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <span></span>
-      <label style="grid-column: span 1;">z</label>
-      <input id="vfs-zmin" type="number" step="0.1" value="-2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <input id="vfs-zmax" type="number" step="0.1" value="2" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <span></span>
+    
+    <div class="control-group-title">Domínio</div>
+    <div class="input-grid" style="grid-template-columns: 30px 1fr 1fr;">
+      <label>x</label>
+      <input id="vfs-xmin" type="number" step="0.1" value="-2" class="input" />
+      <input id="vfs-xmax" type="number" step="0.1" value="2" class="input" />
+      
+      <label>y</label>
+      <input id="vfs-ymin" type="number" step="0.1" value="-2" class="input" />
+      <input id="vfs-ymax" type="number" step="0.1" value="2" class="input" />
+      
+      <label>z</label>
+      <input id="vfs-zmin" type="number" step="0.1" value="-2" class="input" />
+      <input id="vfs-zmax" type="number" step="0.1" value="2" class="input" />
     </div>
-    <div style="font-weight:600; margin:8px 0 4px;">Resolução</div>
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+    
+    <div class="control-group-title">Resolução</div>
+    <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
       <label>nx</label>
-      <input id="vfs-nx" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
       <label>ny</label>
-      <input id="vfs-ny" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
       <label>nz</label>
-      <input id="vfs-nz" type="number" min="3" max="21" step="2" value="9" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-nx" type="number" min="3" max="21" step="2" value="9" class="input" />
+      <input id="vfs-ny" type="number" min="3" max="21" step="2" value="9" class="input" />
+      <input id="vfs-nz" type="number" min="3" max="21" step="2" value="9" class="input" />
     </div>
-    <div style="font-weight:600; margin:8px 0 4px;">Escala das setas</div>
-    <div style="display:grid; grid-template-columns: 1fr 60px; gap:8px; align-items:center;">
+    
+    <div class="control-group-title">Escala das setas</div>
+    <div class="input-grid" style="grid-template-columns: 1fr 60px;">
       <input id="vfs-scale" type="range" min="0.3" max="3" step="0.1" value="1" />
-      <input id="vfs-scale-num" type="number" min="0.3" max="3" step="0.1" value="1" style="padding:4px; border-radius:6px;" />
+      <input id="vfs-scale-num" type="number" min="0.3" max="3" step="0.1" value="1" class="input" />
     </div>
-    <div style="font-weight:600; margin:8px 0 4px;">Raio das setas</div>
-    <div style="display:grid; grid-template-columns: 1fr 60px; gap:8px; align-items:center;">
+    
+    <div class="control-group-title">Raio das setas</div>
+    <div class="input-grid" style="grid-template-columns: 1fr 60px;">
       <input id="vfs-radius" type="range" min="0.5" max="3" step="0.1" value="1" />
-      <input id="vfs-radius-num" type="number" min="0.5" max="3" step="0.1" value="1" style="padding:4px; border-radius:6px;" />
+      <input id="vfs-radius-num" type="number" min="0.5" max="3" step="0.1" value="1" class="input" />
     </div>
-    <label style="display:flex; align-items:center; gap:6px; margin-top:8px;">
+    
+    <label class="checkbox-label">
       <input id="vfs-auto" type="checkbox" />
       Aplicar automaticamente
     </label>
+    
     <div style="display:flex; gap:8px; margin-top:10px;">
-      <button id="vfs-render" style="flex:1; padding:8px; border-radius:6px; border:1px solid #1976d2; background:#2196f3; color:#fff;">Renderizar</button>
-      <span id="vfs-status" style="align-self:center; font-size:12px; color:#444;"></span>
+      <button id="vfs-render" class="btn btn-primary" style="flex:1;">Renderizar</button>
+      <span id="vfs-status" class="status-text"></span>
     </div>
-    <hr style="margin:12px 0; border:none; border-top:1px solid rgba(0,0,0,0.1)" />
-    <div style="font-weight:600; margin:6px 0 4px;">Linhas de Fluxo</div>
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+    
+    <hr class="divider" />
+    
+    <div class="control-group-title">Linhas de Fluxo</div>
+    <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
       <label>Seeds nx</label>
-      <input id="vfs-seeds-nx" type="number" min="3" max="21" step="2" value="7" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-seeds-nx" type="number" min="3" max="21" step="2" value="7" class="input" />
       <label>ny</label>
-      <input id="vfs-seeds-ny" type="number" min="3" max="21" step="2" value="7" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <span></span>
+      <input id="vfs-seeds-ny" type="number" min="3" max="21" step="2" value="7" class="input" />
+      
       <label>Passo h</label>
-      <input id="vfs-h" type="number" step="0.01" value="0.1" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-h" type="number" step="0.01" value="0.1" class="input" />
       <label>maxSteps</label>
-      <input id="vfs-maxsteps" type="number" min="50" max="5000" step="50" value="400" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-maxsteps" type="number" min="50" max="5000" step="50" value="400" class="input" />
+      
       <label>Vel. desenho</label>
-      <input id="vfs-drawspeed" type="number" min="5" max="500" step="5" value="100" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-drawspeed" type="number" min="5" max="500" step="5" value="100" class="input" />
+      <label>Vel. partículas</label>
+      <input id="vfs-particlespeed" type="number" min="1" max="100" step="1" value="4" class="input" />
+    </div>
+    
+    <div class="input-grid">
       <label>Direção</label>
-      <select id="vfs-direction" style="grid-column: span 2; padding:6px; border-radius:6px;">
+      <select id="vfs-direction" class="input">
         <option value="both" selected>Ambas</option>
         <option value="forward">Adiante</option>
         <option value="backward">Atrás</option>
       </select>
-      <span></span>
-      <label>Vel. partículas</label>
-      <input id="vfs-particlespeed" type="number" min="1" max="100" step="1" value="4" style="grid-column: span 2; padding:4px; border-radius:6px;" />
-      <label style="grid-column: span 3;"><input id="vfs-animate-draw" type="checkbox" checked /> Animar desenho</label>
     </div>
+    <label class="checkbox-label" style="margin-top:6px;"><input id="vfs-animate-draw" type="checkbox" checked /> Animar desenho</label>
+    
     <div style="display:flex; gap:8px; margin-top:8px;">
-      <button id="vfs-stream" style="flex:1; padding:8px; border-radius:6px; border:1px solid #1976d2; background:#42a5f5; color:#fff;">Gerar Streamlines</button>
-      <button id="vfs-clear-stream" style="flex:1; padding:8px; border-radius:6px; border:1px solid #9e9e9e; background:#e0e0e0; color:#222;">Limpar</button>
+      <button id="vfs-stream" class="btn btn-primary" style="flex:1;">Gerar Streamlines</button>
+      <button id="vfs-clear-stream" class="btn btn-secondary" style="flex:1;">Limpar</button>
     </div>
-    <div id="vfs-stream-status" style="margin-top:6px; font-size:12px; color:#444;"></div>
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center; margin-top:6px;">
+    <div id="vfs-stream-status" class="status-text" style="margin-top:6px;"></div>
+    
+    <div class="input-grid" style="grid-template-columns: auto 1fr; margin-top:6px;">
       <label>Cor por</label>
-      <select id="vfs-stream-color" style="grid-column: span 5; padding:6px; border-radius:6px;">
+      <select id="vfs-stream-color" class="input">
         <option value="single">Única (azul)</option>
         <option value="speed">Velocidade |F|</option>
       </select>
     </div>
-    </div>
-    <hr style="margin:12px 0; border:none; border-top:1px solid rgba(0,0,0,0.1)" />
-    <div style="font-weight:600; margin:6px 0 4px;">Integral de Linha</div>
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center;">
+    
+    <hr class="divider" />
+    
+    <div class="control-group-title">Integral de Linha</div>
+    <div class="input-grid" style="grid-template-columns: 30px 1fr;">
       <label>x(t)</label>
-      <input id="vfs-curve-x" placeholder="cos(t)" value="cos(t)" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <input id="vfs-curve-x" placeholder="cos(t)" value="cos(t)" class="input" />
       <label>y(t)</label>
-      <input id="vfs-curve-y" placeholder="sin(t)" value="sin(t)" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <input id="vfs-curve-y" placeholder="sin(t)" value="sin(t)" class="input" />
       <label>z(t)</label>
-      <input id="vfs-curve-z" placeholder="0" value="0" style="grid-column: span 5; padding:4px; border-radius:6px;" />
+      <input id="vfs-curve-z" placeholder="0" value="0" class="input" />
+    </div>
+    <div class="input-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
       <label>t min</label>
-      <input id="vfs-tmin" type="number" step="0.1" value="0" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-tmin" type="number" step="0.1" value="0" class="input" />
       <label>max</label>
-      <input id="vfs-tmax" type="number" step="0.1" value="6.28" style="grid-column: span 2; padding:4px; border-radius:6px;" />
+      <input id="vfs-tmax" type="number" step="0.1" value="6.28" class="input" />
     </div>
+    
     <div style="display:flex; gap:8px; margin-top:8px;">
-      <button id="vfs-calc-line" style="flex:1; padding:8px; border-radius:6px; border:1px solid #e65100; background:#ff9800; color:#fff;">Calcular Integral</button>
-      <button id="vfs-clear-line" style="flex:0 0 40px; padding:8px; border-radius:6px; border:1px solid #9e9e9e; background:#e0e0e0; color:#222;">X</button>
+      <button id="vfs-calc-line" class="btn btn-accent" style="flex:1;">Calcular Integral</button>
+      <button id="vfs-clear-line" class="btn btn-secondary" style="flex:0 0 40px;">X</button>
     </div>
-    <div id="vfs-line-result" style="margin-top:6px; font-weight:bold; color:#e65100; text-align:center;"></div>
+    <div id="vfs-line-result" class="line-result"></div>
   `;
 
   document.body.appendChild(panel);
 
-  // Acrescentar seção de Seeds por clique (programaticamente)
   const seedsSection = document.createElement('div');
   seedsSection.innerHTML = `
-    <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:4px; align-items:center; margin-top:6px;">
-      <label style="grid-column: span 3;"><input id="vfs-click-seeds" type="checkbox" /> Seeds por clique</label>
-      <button id="vfs-clear-seeds" style="grid-column: span 3; padding:6px; border-radius:6px; border:1px solid #9e9e9e; background:#fafafa;">Limpar Seeds</button>
-      <span id="vfs-seed-count" style="grid-column: span 6; font-size:12px; color:#444;">0 seeds</span>
+    <div class="input-grid" style="grid-template-columns: repeat(6, 1fr); margin-top:6px;">
+      <label class="checkbox-label" style="grid-column: span 3;"><input id="vfs-click-seeds" type="checkbox" /> Seeds por clique</label>
+      <button id="vfs-clear-seeds" class="btn btn-secondary" style="grid-column: span 3;">Limpar Seeds</button>
+      <span id="vfs-seed-count" class="status-text" style="grid-column: span 6;">0 seeds</span>
     </div>
   `;
   panel.appendChild(seedsSection);
@@ -516,7 +516,7 @@ import * as THREE from 'three';
       }
 
       const data = await res.json();
-      elLineResult.textContent = `Resultado: ${data.result.toFixed(4)}`;
+      elLineResult.textContent = `Resultado: ${data.result.toFixed(4)} `;
 
       if (data.points) {
         renderCurve(window.vfsScene, data.points);
