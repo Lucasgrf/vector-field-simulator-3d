@@ -1,84 +1,92 @@
-# 📘 Vector Field Simulator 3D – Complete Documentation
+# Simulador Interativo 3D de Campos Vetoriais
 
-This file combines the three main README files of the project:
-- Root README (general overview)
-- Backend README
-- Frontend README
+Um simulador interativo desenvolvido para a disciplina de Cálculo II, permitindo a visualização e análise de campos vetoriais em 3D. O projeto combina renderização gráfica avançada no navegador com cálculos matemáticos simbólicos no servidor.
 
-Use this document as a unified reference or split it later if needed.
+## 🚀 Funcionalidades
 
----
+O simulador oferece um conjunto robusto de ferramentas para explorar conceitos de cálculo vetorial:
 
-## 🌐 Root – Project Overview
+*   **Visualização de Campos Vetoriais**: Renderização de vetores em 3D para funções parametrizadas $P(x,y,z)$, $Q(x,y,z)$ e $R(x,y,z)$.
+*   **Controle de Domínio e Resolução**: Ajuste dinâmico dos limites dos eixos ($x, y, z$) e da densidade da malha de vetores.
+*   **Mapeamento de Cores**:
+    *   **Magnitude**: Cores baseadas na intensidade do campo $|F|$.
+    *   **Divergente**: Visualização de fontes e sumidouros ($\nabla \cdot F$).
+    *   **Rotacional**: Intensidade da rotação local ($|\nabla \times F|$).
+*   **Linhas de Fluxo (Streamlines)**: Geração de trajetórias de partículas seguindo o campo, utilizando o método numérico Runge-Kutta de 4ª ordem (RK4).
+*   **Integrais de Linha**: Cálculo numérico e visualização de integrais de linha $\int_C \mathbf{F} \cdot d\mathbf{r}$ ao longo de curvas paramétricas personalizadas.
+*   **Interatividade**: Rotação, zoom e pan em 3D, além de possibilidade de adicionar "sementes" para streamlines clicando diretamente no canvas.
 
-# 🌐 Vector Field Simulator 3D
+## 🛠️ Tecnologias Utilizadas
 
-An interactive 3D simulator of vector fields built for a Calculus II capstone project.
-This project visualizes vector fields, particle flow, and supports basic calculations such as line integrals.
+### Frontend
+*   **Vite**: Build tool rápida para desenvolvimento moderno.
+*   **Three.js**: Biblioteca principal para renderização 3D (WebGL).
+*   **JavaScript (ES6+)**: Lógica de interface e manipulação de cena.
+*   **CSS3**: Estilização moderna com variáveis e design responsivo (Glassmorphism).
 
-## 🚀 Tech Stack
+### Backend
+*   **Node.js**: Ambiente de execução JavaScript no servidor.
+*   **Express**: Framework web para criar a API REST.
+*   **Math.js**: Biblioteca poderosa para parsing de expressões matemáticas, derivadas simbólicas e operações vetoriais.
 
-| Layer     | Technology                 |
-|-----------|----------------------------|
-| Frontend  | Vite + JavaScript + Three.js |
-| Backend   | Node.js + Express + mathjs |
-| Docs      | Markdown (exported later to Word) |
+### Documentação
+*   **LaTeX (AbnTeX2)**: Relatório acadêmico completo formatado nas normas ABNT.
 
-## 📂 Project Structure
+## 📦 Estrutura do Projeto
 
 ```
 vector-field-simulator-3d/
- ├── backend/          # Node.js API for vector field math
- ├── frontend/         # 3D rendering UI built with Three.js
- ├── docs/             # Project report, derivations, images
- └── README.md         # Main project instructions
+ ├── backend/          # API Node.js (Cálculos matemáticos)
+ │    ├── utils/       # Helpers matemáticos (RK4, derivadas)
+ │    └── server.js    # Entry point do servidor
+ ├── frontend/         # Cliente Web (Visualização)
+ │    ├── src/         # Código fonte (Three.js, UI, Styles)
+ │    └── index.html   # Entry point da aplicação
+ ├── docs/             # Documentação e Relatório
+ │    ├── Relatorio.tex # Fonte LaTeX do relatório
+ │    └── ref.bib       # Referências bibliográficas
+ └── README.md         # Este arquivo
 ```
 
-## 🛠️ How to Run
+## 🔧 Como Executar
 
-### 1. Start Backend (port 3000)
+O projeto requer **Node.js** instalado. Siga os passos abaixo para iniciar ambos os servidores (Backend e Frontend).
+
+### 1. Iniciar o Backend
+O backend roda na porta `3000` e processa os cálculos pesados.
+
 ```bash
 cd backend
 npm install
-npm run start
+npm start
 ```
+*Aguarde a mensagem: "Backend rodando na porta 3000..."*
 
-### 2. Start Frontend (port 5173)
+### 2. Iniciar o Frontend
+O frontend roda na porta `5173` (padrão do Vite) e serve a interface.
+
+Em um **novo terminal**:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Access the simulator at:
-👉 http://localhost:5173
+### 3. Acessar
+Abra seu navegador e acesse:
+👉 **http://localhost:5173**
 
-## 🔍 Features
+## 👥 Autores
 
-✅ 3D vector field visualization  
-✅ Simple particle movement simulation  
-✅ Extensible API for math calculations  
-✅ Educational focus for Calculus II concepts
+Projeto desenvolvido pelos alunos:
 
-## 📚 Documentation
+*   **Lucas Rocha**
+*   **Kaio Ribeiro**
+*   **Izac Regis**
+*   **Gabriel Garcia**
+*   **Mikael Lopes**
+*   **Felipe Araujo**
+*   **Hudson Silva**
 
-The full mathematical report and derivations are inside the `docs/` folder:
-- `Relatorio.md` – Main project report
-- `Derivacao_Matematica.md` – Math derivation and concepts
-- `imagens/` – Screenshots and rendered images
-
-## ✅ Roadmap
-
-- [ ] Add UI input for custom vector fields
-- [ ] Implement curl and divergence visualizers
-- [ ] Add numerical line integral solver in backend
-- [ ] Create demo GIF for README
-
-## 👨‍🏫 Educational Purpose
-
-This tool demonstrates key topics from multivariable calculus to make abstract math concepts more intuitive and visual.
-
-## 📝 License
-
-MIT License  
-Author: Lucas Ferreira
+---
+Desenvolvido com ❤️ e ☕ para Cálculo II.

@@ -1,3 +1,4 @@
+import './style.css';
 import './canvas.js';
 import './ui.js';
 

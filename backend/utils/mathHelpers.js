@@ -374,15 +374,6 @@ function integrateStreamline(fieldData, seed, opts) {
   return { points: pts, speeds: spd, seedIndex };
 }
 
-
-// ---- Line Integral ----
-
-function compileScalar(expr) {
-  const node = math.parse(expr);
-  validateNode(node);
-  return compileNode(node);
-}
-
 function calculateLineIntegral(fieldStr, curve, tRange, steps = 100) {
   // 1. Prepare Curve
   // curve = { x: "cos(t)", y: "sin(t)", z: "0" }
