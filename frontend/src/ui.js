@@ -112,7 +112,7 @@ import * as THREE from 'three';
     </div>
     
     <label class="checkbox-label">
-      <input id="vfs-auto" type="checkbox" />
+      <input id="vfs-auto" type="checkbox" checked />
       Aplicar automaticamente
     </label>
     
@@ -570,8 +570,8 @@ import * as THREE from 'three';
     helpPanel.classList.remove('active');
   });
 
-  // Delegate events for help icons
-  panel.addEventListener('click', (e) => {
+  // Delegate events for help icons (global listener to catch legend icons too)
+  document.body.addEventListener('click', (e) => {
     if (e.target.classList.contains('help-icon')) {
       const key = e.target.getAttribute('data-key');
       showHelp(key);

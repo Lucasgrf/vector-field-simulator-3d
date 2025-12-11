@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
     const baseH = (typeof h === 'number') ? h : 0.1;
     const baseOpts = {
       h: baseH,
-      maxSteps: Number.isInteger(maxSteps) ? Math.min(maxSteps, 2000) : 500,
+      maxSteps: Number.isInteger(maxSteps) ? Math.min(maxSteps, 5000) : 500,
       bbox: bbox || { x: [-10, 10], y: [-10, 10], z: [-10, 10] },
       minSpeed: typeof minSpeed === 'number' ? minSpeed : 1e-12,
       bidirectional: true,

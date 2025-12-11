@@ -40,11 +40,64 @@ function normalize01(value, minVal, maxVal) {
 }
 
 function createLegend() {
-  const el = document.createElement('div');
-  Object.assign(el.style, {
+  const container = document.createElement('div');
+  Object.assign(container.style, {
     position: 'fixed',
     bottom: '12px',
     right: '12px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'end',
+    gap: '2px',
+    pointerEvents: 'none', // permit click only on interactive elements
+    zIndex: '900',
+  });
+
+  // Top row: Title + Info Icon
+  const topRow = document.createElement('div');
+  Object.assign(topRow.style, {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    marginBottom: '2px',
+  });
+
+  const label = document.createElement('div');
+  label.textContent = 'Magnitude';
+  Object.assign(label.style, {
+    color: '#222',
+    fontFamily: 'sans-serif',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    textShadow: '0 0 2px rgba(255,255,255,0.8)',
+  });
+
+  const infoIcon = document.createElement('span');
+  infoIcon.textContent = 'i';
+  infoIcon.className = 'help-icon';
+  infoIcon.setAttribute('data-key', 'legend_gradient');
+  Object.assign(infoIcon.style, {
+    pointerEvents: 'auto', // enable click
+    width: '14px',
+    height: '14px',
+    fontSize: '10px',
+    lineHeight: '14px',
+    display: 'inline-block',
+    textAlign: 'center',
+    borderRadius: '50%',
+    background: '#ccc',
+    color: '#fff',
+    cursor: 'pointer',
+    userSelect: 'none',
+  });
+
+  topRow.appendChild(label);
+  topRow.appendChild(infoIcon);
+  container.appendChild(topRow);
+
+  // Gradient Bar
+  const bar = document.createElement('div');
+  Object.assign(bar.style, {
     width: '220px',
     height: '14px',
     background: 'linear-gradient(90deg, #0033ff, #00ffff, #ffff00, #ff0000)',
@@ -52,18 +105,29 @@ function createLegend() {
     borderRadius: '4px',
     boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   });
-  const label = document.createElement('div');
-  label.textContent = 'Magnitude (min -> max)';
-  Object.assign(label.style, {
-    position: 'absolute',
-    top: '-18px',
-    right: '0',
-    color: '#222',
-    fontFamily: 'sans-serif',
-    fontSize: '12px',
+  container.appendChild(bar);
+
+  // Bottom row: Min/Max values
+  const bottomRow = document.createElement('div');
+  Object.assign(bottomRow.style, {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontFamily: 'monospace',
+    fontSize: '11px',
+    color: '#333',
+    marginTop: '2px',
   });
-  el.appendChild(label);
-  return el;
+  const minLabel = document.createElement('span');
+  minLabel.textContent = 'min';
+  const maxLabel = document.createElement('span');
+  maxLabel.textContent = 'max';
+
+  bottomRow.appendChild(minLabel);
+  bottomRow.appendChild(maxLabel);
+  container.appendChild(bottomRow);
+
+  return { container, label, minLabel, maxLabel };
 }
 
 export async function renderVectorField(scene, options = {}) {
@@ -112,7 +176,7 @@ export async function renderVectorField(scene, options = {}) {
 
   // Determinar valores de coloração conforme modo
   let colorVals = mags.slice();
-  let legendLabel = 'Magnitude (min -> max)';
+  let legendLabel = 'Magnitude';
 
   if (mode === 'div') {
     const API_URL = import.meta.env.VITE_API_URL || '';
@@ -126,7 +190,7 @@ export async function renderVectorField(scene, options = {}) {
     }
     const { values: divVals } = await r.json();
     colorVals = divVals;
-    legendLabel = 'Divergente (min -> max)';
+    legendLabel = 'Divergente';
   } else if (mode === 'curl') {
     const API_URL = import.meta.env.VITE_API_URL || '';
     const r = await fetch(`${API_URL}/api/vector-field/curl`, {
@@ -139,7 +203,7 @@ export async function renderVectorField(scene, options = {}) {
     }
     const { values: curlVals } = await r.json();
     colorVals = curlVals.map(v => Math.hypot(v[0], v[1], v[2]));
-    legendLabel = 'Rotacional |curl| (min -> max)';
+    legendLabel = 'Rotacional |curl|';
   }
 
   // Estatísticas para normalização de cor
@@ -229,13 +293,15 @@ export async function renderVectorField(scene, options = {}) {
   }
   scene.add(group);
 
-  const legend = createLegend();
-  legend.querySelector('div').textContent = legendLabel;
-  document.body.appendChild(legend);
+  const { container, label, minLabel, maxLabel } = createLegend();
+  label.textContent = legendLabel;
+  minLabel.textContent = minVal.toFixed(2);
+  maxLabel.textContent = maxVal.toFixed(2);
+  document.body.appendChild(container);
 
   current.mesh = null;
   current.group = group;
-  current.legend = legend;
+  current.legend = container;
 }
 
 export async function updateVectorField(scene, options) {

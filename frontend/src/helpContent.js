@@ -12,6 +12,10 @@ export const helpContent = {
         title: "Modo de Coloração",
         description: "Escolha como as setas são coloridas. 'Magnitude' usa o tamanho do vetor. 'Divergente' mostra fontes/sumidouros. 'Rotacional' mostra a intensidade do giro."
     },
+    "legend_gradient": {
+        title: "Legenda de Cores",
+        description: "A barra de cores mostra como os valores (magnitude, divergente, etc.) são mapeados para cores. Azul representa o valor mínimo e Vermelho o valor máximo presente na visualização atual."
+    },
     "domain": {
         title: "Domínio de Visualização",
         description: "Define os limites da caixa (xmin, xmax, etc.) onde o campo vetorial será calculado e exibido."
