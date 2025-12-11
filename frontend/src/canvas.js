@@ -7,13 +7,13 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xf0f0f0, 1);
+renderer.setClearColor(0x121212, 1);
 // Melhor gestão de cores para tons consistentes
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 // Grid helper
-const grid = new THREE.GridHelper(20, 20);
+const grid = new THREE.GridHelper(20, 20, 0x555555, 0x333333);
 scene.add(grid);
 
 // Axes helper (X=vermelho, Y=verde, Z=azul)
