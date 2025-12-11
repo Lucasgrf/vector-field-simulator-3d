@@ -52,7 +52,8 @@ export async function renderStreamlines(scene, options = {}) {
   }
 
   const bbox = { x: domain.x, y: domain.y, z: domain.z };
-  const res = await fetch('/api/streamlines', {
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const res = await fetch(`${API_URL}/api/streamlines`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ field, seeds: seedsList, h, maxSteps, bbox, bidirectional })
