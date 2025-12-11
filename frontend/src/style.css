@@ -330,3 +330,106 @@ input[type="range"]::-moz-range-thumb {
   /* Orange 50 */
   border-radius: var(--input-border-radius);
 }
+
+/* Help Icon */
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #555;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: serif;
+  cursor: pointer;
+  margin-left: 6px;
+  user-select: none;
+  transition: background 0.2s, transform 0.2s;
+  vertical-align: middle;
+  border: 1px solid #ccc;
+}
+
+.help-icon:hover {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+/* Help Panel (Guide) */
+.help-panel {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  width: 300px;
+  max-height: calc(100vh - 40px);
+  background: var(--panel-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(8px);
+  padding: 0;
+  z-index: 2000;
+  overflow-y: auto;
+  transform: translateX(350px);
+  /* Hidden by default */
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.help-panel.active {
+  transform: translateX(0);
+}
+
+.help-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.help-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+.help-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.help-panel-close:hover {
+  color: var(--danger-color);
+}
+
+.help-panel-body {
+  padding: 16px;
+}
+
+.help-topic-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.help-topic-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color);
+  margin: 0;
+}

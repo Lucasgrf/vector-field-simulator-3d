@@ -1,6 +1,7 @@
 import { updateVectorField } from './vectorFieldRenderer.js';
 import { renderStreamlines, clearStreamlines } from './streamlinesRenderer.js';
 import { renderCurve, clearCurve } from './curveRenderer.js';
+import { helpContent } from './helpContent.js';
 import * as THREE from 'three';
 
 // Minimal UI for Phase 0: backend health test
@@ -51,7 +52,7 @@ import * as THREE from 'three';
   panel.className = 'control-panel';
 
   panel.innerHTML = `
-    <div class="control-panel-title">Campo Vetorial (P, Q, R)</div>
+    <div class="control-panel-title">Campo Vetorial (P, Q, R) <span class="help-icon" data-key="field_eq">i</span></div>
     <div class="input-grid">
       <select id="vfs-preset" class="input">
         <option value="custom">— Presets —</option>
@@ -65,14 +66,14 @@ import * as THREE from 'three';
       <input id="vfs-R" placeholder="R(x,y,z)" value="z" class="input" />
     </div>
     
-    <div class="control-group-title">Colorir por</div>
+    <div class="control-group-title">Colorir por <span class="help-icon" data-key="color_mode">i</span></div>
     <select id="vfs-mode" class="input">
       <option value="magnitude" selected>Magnitude do campo |F|</option>
       <option value="div">Divergente div F</option>
       <option value="curl">Rotacional |curl F|</option>
     </select>
     
-    <div class="control-group-title">Domínio</div>
+    <div class="control-group-title">Domínio <span class="help-icon" data-key="domain">i</span></div>
     <div class="input-grid" style="grid-template-columns: 30px 1fr 1fr;">
       <label>x</label>
       <input id="vfs-xmin" type="number" step="0.1" value="-2" class="input" />
@@ -87,7 +88,7 @@ import * as THREE from 'three';
       <input id="vfs-zmax" type="number" step="0.1" value="2" class="input" />
     </div>
     
-    <div class="control-group-title">Resolução</div>
+    <div class="control-group-title">Resolução <span class="help-icon" data-key="resolution">i</span></div>
     <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
       <label>nx</label>
       <label>ny</label>
@@ -97,13 +98,13 @@ import * as THREE from 'three';
       <input id="vfs-nz" type="number" min="3" max="21" step="2" value="9" class="input" />
     </div>
     
-    <div class="control-group-title">Escala das setas</div>
+    <div class="control-group-title">Escala das setas <span class="help-icon" data-key="arrow_scale">i</span></div>
     <div class="input-grid" style="grid-template-columns: 1fr 60px;">
       <input id="vfs-scale" type="range" min="0.3" max="3" step="0.1" value="1" />
       <input id="vfs-scale-num" type="number" min="0.3" max="3" step="0.1" value="1" class="input" />
     </div>
     
-    <div class="control-group-title">Raio das setas</div>
+    <div class="control-group-title">Raio das setas <span class="help-icon" data-key="arrow_radius">i</span></div>
     <div class="input-grid" style="grid-template-columns: 1fr 60px;">
       <input id="vfs-radius" type="range" min="0.5" max="3" step="0.1" value="1" />
       <input id="vfs-radius-num" type="number" min="0.5" max="3" step="0.1" value="1" class="input" />
@@ -121,7 +122,7 @@ import * as THREE from 'three';
     
     <hr class="divider" />
     
-    <div class="control-group-title">Linhas de Fluxo</div>
+    <div class="control-group-title">Linhas de Fluxo <span class="help-icon" data-key="stream_seeds">i</span></div>
     <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
       <label>Seeds nx</label>
       <input id="vfs-seeds-nx" type="number" min="3" max="21" step="2" value="7" class="input" />
@@ -165,7 +166,7 @@ import * as THREE from 'three';
     
     <hr class="divider" />
     
-    <div class="control-group-title">Integral de Linha</div>
+    <div class="control-group-title">Integral de Linha <span class="help-icon" data-key="line_curve">i</span></div>
     <div class="input-grid" style="grid-template-columns: 30px 1fr;">
       <label>x(t)</label>
       <input id="vfs-curve-x" placeholder="cos(t)" value="cos(t)" class="input" />
@@ -533,6 +534,46 @@ import * as THREE from 'three';
   if (elClearLine) elClearLine.addEventListener('click', () => {
     clearCurve(window.vfsScene);
     elLineResult.textContent = '';
+  });
+
+  // --- Help Panel Logic ---
+  const helpPanel = document.createElement('div');
+  helpPanel.className = 'help-panel';
+  helpPanel.innerHTML = `
+      <div class="help-panel-header">
+        <h3 class="help-panel-title">Guia de Ajuda</h3>
+        <button class="help-panel-close">&times;</button>
+      </div>
+      <div class="help-panel-body">
+        <p class="help-topic-desc" style="font-style:italic; color:#999;">Clique em um ícone "i" para ver detalhes.</p>
+      </div>
+    `;
+  document.body.appendChild(helpPanel);
+
+  const helpBody = helpPanel.querySelector('.help-panel-body');
+  const helpClose = helpPanel.querySelector('.help-panel-close');
+
+  function showHelp(key) {
+    const content = helpContent[key];
+    if (!content) return;
+
+    helpBody.innerHTML = `
+        <h4 class="help-topic-title">${content.title}</h4>
+        <p class="help-topic-desc">${content.description}</p>
+      `;
+    helpPanel.classList.add('active');
+  }
+
+  helpClose.addEventListener('click', () => {
+    helpPanel.classList.remove('active');
+  });
+
+  // Delegate events for help icons
+  panel.addEventListener('click', (e) => {
+    if (e.target.classList.contains('help-icon')) {
+      const key = e.target.getAttribute('data-key');
+      showHelp(key);
+    }
   });
 })();
 
