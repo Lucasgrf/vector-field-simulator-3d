@@ -94,7 +94,8 @@ export async function renderVectorField(scene, options = {}) {
   } = options;
 
   // Buscar valores do backend
-  const res = await fetch('/api/vector-field/evaluate-grid', {
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const res = await fetch(`${API_URL}/api/vector-field/evaluate-grid`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ field, domain, resolution })
@@ -114,7 +115,8 @@ export async function renderVectorField(scene, options = {}) {
   let legendLabel = 'Magnitude (min -> max)';
 
   if (mode === 'div') {
-    const r = await fetch('/api/vector-field/div', {
+    const API_URL = import.meta.env.VITE_API_URL || '';
+    const r = await fetch(`${API_URL}/api/vector-field/div`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ field, domain, resolution })
     });
@@ -126,7 +128,8 @@ export async function renderVectorField(scene, options = {}) {
     colorVals = divVals;
     legendLabel = 'Divergente (min -> max)';
   } else if (mode === 'curl') {
-    const r = await fetch('/api/vector-field/curl', {
+    const API_URL = import.meta.env.VITE_API_URL || '';
+    const r = await fetch(`${API_URL}/api/vector-field/curl`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ field, domain, resolution })
     });

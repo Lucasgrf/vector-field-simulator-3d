@@ -27,7 +27,8 @@ import * as THREE from 'three';
     btn.textContent = 'Testando...';
     try {
       // Use Vite dev proxy to avoid CORS and host issues during development
-      const res = await fetch('/api/health');
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API_URL}/api/health`);
       const data = await res.json();
       console.log('Health:', data);
       btn.textContent = data.status === 'ok' ? 'Backend OK' : 'Backend (?)';
@@ -505,7 +506,8 @@ import * as THREE from 'three';
     elLineResult.textContent = 'Calculando...';
 
     try {
-      const res = await fetch('/api/integration/line', {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API_URL}/api/integration/line`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ field, curve, tRange, steps: 200 })
